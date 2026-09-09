@@ -18,14 +18,15 @@ import {
   type ClassifyFormResponse,
   type GetFormResponse,
   type ExtractFormResponse,
+  type FillFormResponse,
   type ErrorResponse,
 } from '@/utils/messaging';
 import { ErrorCode, createAppError, isAppError } from '@/core/types/errors';
 
 /**
  * Content script entry.
- * P2 discovery → P3 classification → P4 Form extraction.
- * No fill / navigation.
+ * P2 discovery → P3 classification → P4 extraction → P5 fill.
+ * No navigation / submission / profile matching.
  */
 
 const adapter = createGoogleFormsAdapter();
@@ -120,6 +121,26 @@ function handleMessage(
         sendResponse(response);
       }
       return false;
+    }
+    case MessageType.FILL_FORM: {
+      void adapter
+        .fill(typed.payload)
+        .then((fill) => {
+          const response: FillFormResponse = { fill };
+          sendResponse(response);
+        })
+        .catch((error: unknown) => {
+          const response: ErrorResponse = {
+            error: isAppError(error)
+              ? error
+              : createAppError(
+                  ErrorCode.FILL_FAILED,
+                  error instanceof Error ? error.message : 'Form fill failed',
+                ),
+          };
+          sendResponse(response);
+        });
+      return true;
     }
     default: {
       const response: ErrorResponse = {

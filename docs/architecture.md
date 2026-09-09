@@ -10,7 +10,7 @@ Google Form AutoFiller helps users fill Google Forms for job and internship appl
 - a review step before fill
 - **manual** submission by the user
 
-This document describes the codebase after **P4 (Form extraction / normalization)**.
+This document describes the codebase after **P5 (Fill Engine foundation)**.
 
 ## 2. P0 foundation (complete)
 
@@ -87,6 +87,7 @@ Central contract: `MessageType` + Zod `ExtensionMessageSchema` in `core/validati
 | `CLASSIFY_FORM` | content | P3 classification report (no Form) |
 | `GET_FORM` | content | P4 normalized `Form` |
 | `EXTRACT_FORM` | content | P4 `{ form, report }` |
+| `FILL_FORM` | content | P5 apply `FillPlan` → `FillResult` |
 
 Runtime validation: `isExtensionMessage` / `AppErrorSchema` at extension boundaries. Errors use `{ error: AppError }`, not bare strings.
 
@@ -133,34 +134,45 @@ See [google-forms-classification.md](./google-forms-classification.md).
 - Scope: currently visible DOM only (`ExtractionReport.scope = current_visible_dom`)
 - DOM-free, JSON-serializable result + `ExtractionReport`
 - `GET_FORM` / `EXTRACT_FORM` return real extraction results
-- `fill` still throws (P5)
 
 See [google-forms-extraction.md](./google-forms-extraction.md).
 
-`GoogleFormsAdapter` exposes discovery, classification, and extraction helpers.
+### P5 — Fill Engine foundation
 
-Flow: DOM discovery → classification → **normalized Form** → P5 fill.
+`applyFillPlan(plan, root)` applies an authoritative `FillPlan` to the currently visible DOM.
 
-Placeholders `content/extractor.ts` and `content/filler.ts` remain thin stubs;
+- Does **not** invent answers, read profiles, call AI, navigate, or submit
+- Resolves `questionId` against current discovery ids
+- Supports text/paragraph/MC/checkbox/dropdown/linear_scale/date/time
+- Rejects unknown/unsupported/invalid operations with structured results
+- Partial failures do not roll back earlier successes
+- `FILL_FORM` / `adapter.fill` return `FillResult`
+
+See [google-forms-fill.md](./google-forms-fill.md).
+
+`GoogleFormsAdapter` exposes discovery, classification, extraction, and fill helpers.
+
+Flow: DOM discovery → classification → normalized Form → **FillPlan application**.
+
 Google Forms logic lives under `content/google-forms/`.
 
 ## 8. Intentionally NOT implemented yet
 
-- Autofill / DOM writes (P5)
-- Profile ↔ question matching engine
+- Profile ↔ question matching / FillPlan construction
 - AI answer generation
 - Review UI beyond the status popup
 - Authentication / backend / Google Docs
 - Automatic submission (permanently out of scope)
 - Multi-section navigation / Next-Back traversal
 
-## 9. Planned P5 evolution
+## 9. Planned next evolution
 
 | Phase | Focus |
 | --- | --- |
 | **P2** | ✅ Google Forms detection & candidate discovery |
 | **P3** | ✅ Deterministic question classification |
 | **P4** | ✅ Normalize discovery+classification → core `Form` / `Question` |
-| **P5** | Fill adapter + review; optional AI later; manual submit |
+| **P5** | ✅ Fill engine (apply FillPlan to visible DOM) |
+| **P6+** | Matching / review / optional AI; manual submit |
 
 Each phase should extend adapters/engines without redesigning the P1 core model.

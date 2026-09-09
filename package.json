@@ -12,7 +12,8 @@
     "clean": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true });\"",
     "p2-discovery-smoke": "tsx --tsconfig tsconfig.app.json scripts/p2-discovery-smoke.ts",
     "p3-classification-smoke": "tsx --tsconfig tsconfig.app.json scripts/p3-classification-smoke.ts",
-    "p4-extraction-smoke": "tsx --tsconfig tsconfig.app.json scripts/p4-extraction-smoke.ts"
+    "p4-extraction-smoke": "tsx --tsconfig tsconfig.app.json scripts/p4-extraction-smoke.ts",
+    "p5-fill-smoke": "tsx --tsconfig tsconfig.app.json scripts/p5-fill-smoke.ts"
   },
   "dependencies": {
     "react": "^19.0.0",

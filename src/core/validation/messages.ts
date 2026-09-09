@@ -5,6 +5,7 @@ import type { FormDetectionResult } from '@/core/types/detection';
 import type { DiscoveryReport } from '@/core/types/discovery-report';
 import type { ClassificationReport } from '@/core/types/classification-report';
 import type { ExtractionResult } from '@/core/types/extraction-report';
+import type { FillResult } from '@/core/types/fill';
 import type { AppError } from '@/core/types/errors';
 import { ErrorCode } from '@/core/types/errors';
 
@@ -24,6 +25,7 @@ export const MessageType = {
   DISCOVER_FORM: 'DISCOVER_FORM',
   CLASSIFY_FORM: 'CLASSIFY_FORM',
   EXTRACT_FORM: 'EXTRACT_FORM',
+  FILL_FORM: 'FILL_FORM',
 } as const;
 
 export type MessageTypeName = (typeof MessageType)[keyof typeof MessageType];
@@ -65,6 +67,30 @@ export const ExtractFormMessageSchema = z.object({
   type: z.literal(MessageType.EXTRACT_FORM),
 });
 
+const AnswerValueSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('single'), value: z.string() }),
+  z.object({
+    kind: z.literal('multi'),
+    values: z.array(z.string()),
+  }),
+]);
+
+const FillOperationSchema = z.object({
+  questionId: z.string().min(1),
+  value: AnswerValueSchema,
+});
+
+export const FillPlanSchema = z.object({
+  formId: z.string().min(1),
+  operations: z.array(FillOperationSchema),
+  createdAt: z.string().min(1),
+});
+
+export const FillFormMessageSchema = z.object({
+  type: z.literal(MessageType.FILL_FORM),
+  payload: FillPlanSchema,
+});
+
 export const ExtensionMessageSchema = z.discriminatedUnion('type', [
   PingMessageSchema,
   GetExtensionStatusMessageSchema,
@@ -75,6 +101,7 @@ export const ExtensionMessageSchema = z.discriminatedUnion('type', [
   DiscoverFormMessageSchema,
   ClassifyFormMessageSchema,
   ExtractFormMessageSchema,
+  FillFormMessageSchema,
 ]);
 
 export type ExtensionMessage = z.infer<typeof ExtensionMessageSchema>;
@@ -117,7 +144,7 @@ export interface PongResponse {
 export interface ExtensionStatusResponse {
   version: string;
   ready: boolean;
-  scope: 'p4-extraction';
+  scope: 'p5-fill';
 }
 
 export interface ProfileResponse {
@@ -148,6 +175,10 @@ export interface ExtractFormResponse {
   extraction: ExtractionResult;
 }
 
+export interface FillFormResponse {
+  fill: FillResult;
+}
+
 export interface ErrorResponse {
   error: AppError;
 }
@@ -162,6 +193,7 @@ export type ExtensionResponse =
   | DiscoverFormResponse
   | ClassifyFormResponse
   | ExtractFormResponse
+  | FillFormResponse
   | ErrorResponse;
 
 export function isErrorResponse(value: unknown): value is ErrorResponse {

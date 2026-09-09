@@ -51,6 +51,10 @@ export {
   logExtractionSummary,
   type ExtractFormMetadata,
 } from './extract';
+export {
+  applyFillPlan,
+  logFillSummary,
+} from './fill';
 export type {
   ExtractionWarningCode,
   ExtractionWarning,

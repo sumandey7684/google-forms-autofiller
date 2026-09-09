@@ -12,13 +12,13 @@ import {
   summarizeClassification,
 } from './classification';
 import { extractForm } from './extract';
+import { applyFillPlan as applyFillPlanToDom } from './fill';
 import type { DiscoveredQuestion, DiscoveryReport } from './types';
 import type { ClassifiedQuestion } from '@/core/types/classification-report';
 
 /**
  * Google Forms adapter boundary.
- * P2 discovery → P3 classification → P4 Form extraction.
- * fill remains unimplemented (P5).
+ * P2 discovery → P3 classification → P4 extraction → P5 fill.
  */
 export class GoogleFormsAdapter implements FormAdapter {
   readonly id = 'google-forms';
@@ -119,11 +119,19 @@ export class GoogleFormsAdapter implements FormAdapter {
     return this.extractResult().form;
   }
 
-  async fill(_plan: FillPlan): Promise<FillResult> {
-    throw createAppError(
-      ErrorCode.FILL_FAILED,
-      'Google Forms fill() is not implemented in P4. Extraction only.',
-    );
+  async fill(plan: FillPlan): Promise<FillResult> {
+    if (!this.canHandle()) {
+      throw createAppError(
+        ErrorCode.FORM_NOT_FOUND,
+        'Google Forms adapter cannot handle this page.',
+      );
+    }
+    return applyFillPlanToDom(plan, document);
+  }
+
+  /** Synchronous fill against an optional root (fixtures / tests). */
+  fillSync(plan: FillPlan, root: ParentNode = document): FillResult {
+    return applyFillPlanToDom(plan, root);
   }
 
   private resolveUrl(root: ParentNode): string {
