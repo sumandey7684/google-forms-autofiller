@@ -1,91 +1,124 @@
 # Google Forms Discovery (P2)
 
-## What discovery means
+## What discovery is responsible for
 
-Discovery is a **read-only DOM scan** that finds *candidate* question containers and answer controls on a Google Forms respondent page.
+Read-only DOM scanning that answers:
 
-It answers:
+> Which DOM regions appear to be questions, and which interactive controls belong to each?
 
-- Is this page something the Google Forms adapter can handle?
-- Which elements look like question containers?
-- Which descendant elements look like answer controls?
-- What tag / role / type / aria-label / name / `data-*` **names** are present?
+Outputs:
 
-It does **not** produce core domain `Form` / `Question` objects.
+- `DiscoveredQuestion` / `DiscoveredControl` (content layer, may hold `HTMLElement`s)
+- `DiscoveryReport` (serializable diagnostics for messaging / logs)
 
-## What discovery does not do
+## What discovery intentionally does not do
 
-- Question type classification
-- Mapping to `src/core/types` `Question` / `Form`
-- Reading or writing answer values
-- Clicks, focus, event dispatch, or any DOM mutation
-- Section navigation
-- MutationObserver / live re-scan
-- Autofill, matching, AI, or submission
+- Semantic question classification (`text`, `checkbox`, …) — **P3**
+- Normalized core `Form` / `Question` construction — **P4**
+- Autofill, clicks, focus, attribute writes, MutationObservers
+- Section navigation, AI, profile matching, review UI
 
-## Why discovery types are separate from core domain types
+## Why DOM types stay out of core
 
-| Layer | Type | Purpose |
+| Layer | Types | May reference DOM? |
 | --- | --- | --- |
-| Content (DOM) | `DiscoveredQuestion` | Holds live `HTMLElement` references for later classification/fill |
-| Core (serializable) | `DiscoveryReport` | Safe diagnostics for messaging / logs |
-| Core (domain) | `Form` / `Question` | Normalized model used by matching & fill planning |
+| `src/content/google-forms/` | `DiscoveredQuestion`, `DiscoveredControl` | Yes |
+| `src/core/types/discovery-report.ts` | `DiscoveryReport` | No (serializable only) |
+| `src/core/types/form.ts` | `Form`, `Question` | No |
 
-Core must stay free of DOM types. Discovery evidence is Google-specific and unstable; the domain model is the stable contract. P3+ will classify `DiscoveredQuestion` → `Question`.
+Core remains reusable and DOM-free. Google-specific instability stays in the adapter.
 
 ## Module layout
 
 ```
 src/content/google-forms/
-  selectors.ts     # centralized ARIA/structural selectors
-  detect.ts        # adapter canHandle (URL + DOM signals)
-  discover.ts      # discoverQuestionContainers()
-  diagnostics.ts   # DiscoveryReport + safe logging
-  adapter.ts       # FormAdapter (canHandle only; extract/fill throw)
-  types.ts         # DiscoveredQuestion (DOM)
+  selectors.ts    # centralized selectors + discovery control kinds
+  detect.ts       # canHandle (URL + structure)
+  discovery.ts    # discoverQuestionContainers()
+  diagnostics.ts  # DiscoveryReport + safe logging
+  adapter.ts      # FormAdapter + discoverQuestions/discoverReport
+  types.ts        # DOM-bearing discovery types
   index.ts
 ```
 
-Serializable report DTOs: `src/core/types/discovery-report.ts`.
+## How question containers are discovered
 
-## Strategy and DOM signals
+Signal priority:
 
-Primary strategy: **`role="list"` / `role="listitem"`**.
+1. **ARIA/structure:** `[role="list"]` → `[role="listitem"]`
+2. **Provider fallback:** `[data-params]` only if listitems are absent
+3. Generated CSS class names are **not** used as primary selectors
 
-Used signals (prefer semantic over generated CSS classes):
+Per container, discovery collects:
 
-- `[role="list"]` — question list region
-- `[role="listitem"]` — candidate question container
-- `[role="heading"]` — candidate question text
-- Answer controls: `input` (non-hidden/button), `textarea`, `select`, and roles `textbox | radio | checkbox | radiogroup | listbox | combobox | spinbutton | slider | option`, plus `[contenteditable="true"]`
-- `aria-required`, `aria-describedby` (structure only)
-- `data-*` **attribute names only** (values omitted)
+- title / description element candidates
+- interactive controls (discovery-level `kind` only)
+- conservative `required` (`true` / `false` / unknown)
+- provider id when present
+- internal `discoveryId` (`discovery:q-N`) when needed for bookkeeping
 
-Intentionally **not** used as primary selectors: obfuscated Google class names (`freebird…`, hashed CSS modules).
+## Provider IDs
+
+- Captured from `name` attributes matching **exact** `entry.<digits>` (`/^entry\.\d+$/`) when available (including hidden metadata inputs).
+- Partial / malformed names like `entry.name` or `entry.123abc` do **not** match.
+- **`providerId`** = Google Forms entry id when found.
+- **`discoveryId`** = internal only (`discovery:q-0`, …), unique within a single discovery run by index — not a cross-session Forms id.
+
+## Required detection
+
+Uses `aria-required`, native `required`, and related probes.
+
+- Confident true/false → set `required`
+- Otherwise → leave `required` unset (unknown)
+- A visible `*` alone is **not** enough
+
+## Diagnostics and privacy
+
+Compact console summary (dev toggle `DISCOVERY_DEBUG_LOGGING`):
+
+```
+[Google Form AutoFiller] Discovery:
+questions=…
+recognized=…
+missingControls=…
+missingTitles=…
+missingProviderIds=…
+signal=…
+```
+
+`DiscoveryReport` / logs **never** include:
+
+- input values
+- checked / selected state
+- passwords
+- profile data
+- full DOM dumps
+
+P2 discovery does **not** read or store control answer values at all.
 
 ## Messaging
 
 | Message | Behavior |
 | --- | --- |
-| `DETECT_FORM` | URL/host heuristic only |
-| `DISCOVER_FORM` | Content script returns `DiscoveryReport` (no Element refs, no answer values) |
-| `GET_FORM` | Still `EXTRACTION_FAILED` — no fake `Form` |
-
-Send `DISCOVER_FORM` to the **content script** on the Forms tab (`chrome.tabs.sendMessage`), not the service worker.
-
-## Diagnostics
-
-On Google Forms pages, the content script logs a summary:
-
-- `containerCount`, `containersWithControls`, `containersWithoutControls`, `totalControls`
-- Per candidate: control counts, tag/role/type, truncated **question text** preview (not answers)
-- Notes such as “No recognizable answer controls”
+| `DETECT_FORM` | URL heuristic |
+| `DISCOVER_FORM` | `DiscoveryReport` (safe) |
+| `GET_FORM` | `EXTRACTION_FAILED` (no fake Form) |
 
 ## Known limitations
 
-- Header / footer / submit `listitem`s may appear as candidates without answer controls
-- Multi-section forms only expose the **current** section’s DOM
-- Custom Google widgets may not match the control selector set yet
-- Page may still be hydrating when the content script runs; re-run `DISCOVER_FORM` after load
-- Discovery is not classification — control presence ≠ supported question type
-- Without a public test form, live selector quality must be validated manually on real pages
+- Header/footer/submit listitems may appear as candidates
+- Only the current section’s DOM is visible
+- Custom widgets may not match the interactive selector set
+- Hydration race possible after `document_idle`; one-shot deferred rediscovery runs only when the first pass finds zero containers (no MutationObserver)
+- URL/content-script matching covers `docs.google.com/forms/*` broadly (editor/preview included), not only `/viewform`
+- Live Google Forms DOM drift is always possible; selectors prefer ARIA over classes
+- Compatibility with every Forms variant is **not** claimed without live verification
+
+## Smoke harnesses
+
+Regression fixtures/scripts (no permanent test-runner dependency):
+
+- `fixtures/p2-discovery-audit.html` + `scripts/p2-discovery-smoke.ts`
+- Companion P3: `fixtures/p3-classification.html` + `scripts/p3-classification-smoke.ts`
+
+Run with ephemeral `linkedom` + `tsx`, then remove those packages.

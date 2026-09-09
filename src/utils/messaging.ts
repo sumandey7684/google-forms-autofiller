@@ -17,6 +17,7 @@ export {
   type DetectFormResponse,
   type GetFormResponse,
   type DiscoverFormResponse,
+  type ClassifyFormResponse,
   type ErrorResponse,
 } from '@/core/validation/messages';
 

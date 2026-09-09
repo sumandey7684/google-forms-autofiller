@@ -37,7 +37,7 @@ async function handleMessage(
       const response: ExtensionStatusResponse = {
         version: EXTENSION_VERSION,
         ready: true,
-        scope: 'p2-discovery',
+        scope: 'p3-classification',
       };
       return response;
     }
@@ -53,7 +53,8 @@ async function handleMessage(
     }
     case MessageType.DETECT_FORM:
     case MessageType.GET_FORM:
-    case MessageType.DISCOVER_FORM: {
+    case MessageType.DISCOVER_FORM:
+    case MessageType.CLASSIFY_FORM: {
       const response: ErrorResponse = {
         error: createAppError(
           ErrorCode.INVALID_REQUEST,

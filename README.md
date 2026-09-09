@@ -8,14 +8,15 @@ Chrome extension for helping users fill Google Forms (job and internship applica
 | --- | --- |
 | P0 foundation (MV3, Vite, React, messaging, popup, service worker, content script) | Complete |
 | P1 domain model + contracts | Complete |
-| Google Forms candidate DOM discovery (read-only) | Partial / early |
-| Full Google Forms parsing / question extraction | Not implemented |
+| Google Forms candidate DOM discovery (read-only) | Complete (P2) |
+| Deterministic question classification | Complete (P3) |
+| Full Google Forms Form extraction | Not implemented (P4) |
 | Profile matching | Not implemented |
 | AI answers | Not implemented |
 | Autofill | Not implemented |
 | Automatic submission | Intentionally not implemented (submit stays manual) |
 
-See [docs/architecture.md](docs/architecture.md) and [docs/google-forms-discovery.md](docs/google-forms-discovery.md).
+See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), and [docs/google-forms-classification.md](docs/google-forms-classification.md).
 
 ## Architecture
 
@@ -37,7 +38,7 @@ src/
 
 **Build:** Vite + `@crxjs/vite-plugin` bundles the extension into `dist/`.
 
-## Current scope (P0 + P1 + P2)
+## Current scope (P0 + P1 + P2 + P3)
 
 Implemented:
 
@@ -46,14 +47,15 @@ Implemented:
 - Background service worker
 - Content script registration on Google Forms URLs
 - Minimal popup UI that pings the service worker
-- Typed messaging contracts (`PING`, profile, status, `DETECT_FORM`, `DISCOVER_FORM`, `GET_FORM` contract)
+- Typed messaging contracts (`PING`, profile, status, `DETECT_FORM`, `DISCOVER_FORM`, `CLASSIFY_FORM`, `GET_FORM` contract)
 - Profile schema + `chrome.storage.local` helpers
 - Domain model: Form / Section / Question / FormAnswer / FillPlan / FillResult / FormAdapter / AppError
 - Google Forms discovery: candidate question containers + control evidence (read-only)
+- Deterministic classification of discovered questions (`ClassifiedQuestion` / `ClassificationReport`)
 
 ## Not implemented yet
 
-- Google Forms DOM parsing / field extraction
+- Full Google Forms Form extraction / normalization (P4)
 - Autofill of form inputs
 - Deterministic profile ↔ question matching
 - AI-generated answers
@@ -120,4 +122,4 @@ npm run clean
 
 ## License
 
-Private / unpublished — no license file yet.
+Apache License 2.0 — see [LICENSE](./LICENSE).

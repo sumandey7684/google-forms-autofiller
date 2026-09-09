@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>P2 Discovery Audit Fixture</title>
+  </head>
+  <body>
+    <!-- Primary list used by discovery -->
+    <div role="list" id="primary-list">
+      <!-- A: short text + provider id -->
+      <div role="listitem" id="q-text">
+        <div role="heading">Full Name</div>
+        <input
+          type="text"
+          aria-label="Full Name"
+          name="entry.123456789"
+          value="SHOULD_NOT_APPEAR_IN_DIAGNOSTICS"
+        />
+      </div>
+
+      <!-- B: paragraph -->
+      <div role="listitem" id="q-para">
+        <div role="heading">Tell us about yourself</div>
+        <textarea aria-label="About you">SECRET_PARAGRAPH</textarea>
+      </div>
+
+      <!-- C: multiple choice (radios) — discovery must not classify -->
+      <div role="listitem" id="q-radio">
+        <div role="heading">Are you available?</div>
+        <div role="radiogroup" aria-label="Are you available?">
+          <div role="radio" aria-label="Yes"></div>
+          <div role="radio" aria-label="No"></div>
+        </div>
+      </div>
+
+      <!-- D: checkboxes -->
+      <div role="listitem" id="q-check">
+        <div role="heading">Skills</div>
+        <div role="checkbox" aria-label="TypeScript"></div>
+        <div role="checkbox" aria-label="React"></div>
+      </div>
+
+      <!-- E: dropdown-like listbox/combobox -->
+      <div role="listitem" id="q-drop">
+        <div role="heading">Preferred timezone</div>
+        <div role="combobox" aria-label="Preferred timezone"></div>
+        <div role="listbox" aria-label="Preferred timezone options">
+          <div role="option" aria-label="UTC"></div>
+          <div role="option" aria-label="IST"></div>
+        </div>
+      </div>
+
+      <!-- F: required true -->
+      <div role="listitem" id="q-req-true" aria-required="true">
+        <div role="heading">Required email</div>
+        <input type="email" aria-required="true" aria-label="Required email" />
+      </div>
+
+      <!-- G: required false -->
+      <div role="listitem" id="q-req-false" aria-required="false">
+        <div role="heading">Optional nickname</div>
+        <input type="text" aria-required="false" aria-label="Optional nickname" />
+      </div>
+
+      <!-- H: unknown required + asterisk only (must stay unknown) -->
+      <div role="listitem" id="q-req-unknown">
+        <div role="heading">Maybe required *</div>
+        <input type="text" aria-label="Maybe required" />
+      </div>
+
+      <!-- I: no provider id -->
+      <div role="listitem" id="q-no-provider">
+        <div role="heading">No provider id</div>
+        <input type="text" aria-label="No provider id" name="not-an-entry" />
+      </div>
+
+      <!-- J covered by q-text entry.123456789 -->
+
+      <!-- K: non-question chrome listitem -->
+      <div role="listitem" id="q-chrome">
+        <div role="heading">Submit section</div>
+        <button type="button">Submit</button>
+      </div>
+
+      <!-- L: no controls -->
+      <div role="listitem" id="q-no-controls">
+        <div role="heading">Section intro with no controls</div>
+      </div>
+
+      <!-- M: no title -->
+      <div role="listitem" id="q-no-title">
+        <input type="text" aria-label="Untitled field" name="entry.999" />
+      </div>
+
+      <!-- N: nested interactive (textbox wrapping input) -->
+      <div role="listitem" id="q-nested">
+        <div role="heading">Nested control</div>
+        <div role="textbox" aria-label="Outer textbox">
+          <input type="text" aria-label="Inner input" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Malformed / partial cases outside primary list -->
+    <div id="malformed-empty"></div>
+
+    <div id="malformed-list-only" role="list"></div>
+
+    <div id="malformed-orphan-listitem" role="listitem">
+      <div role="heading">Orphan listitem</div>
+      <input type="text" />
+    </div>
+
+    <!-- Nested data-params should not explode fallback -->
+    <div id="fallback-root">
+      <div data-params='["outer"]' id="dp-outer">
+        <div role="heading">Fallback outer</div>
+        <input type="text" name="entry.555" />
+        <div data-params='["inner"]' id="dp-inner">
+          <input type="text" name="entry.556" />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

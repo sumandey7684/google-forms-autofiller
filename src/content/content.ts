@@ -1,8 +1,9 @@
 import { detectGoogleForm } from './detector';
 import {
   createGoogleFormsAdapter,
-  buildDiscoveryReport,
-  logDiscoveryReport,
+  logDiscoverySummary,
+  logClassificationSummary,
+  summarizeDiscoveredQuestions,
 } from './google-forms';
 import {
   MessageType,
@@ -12,13 +13,15 @@ import {
   type PongResponse,
   type DetectFormResponse,
   type DiscoverFormResponse,
+  type ClassifyFormResponse,
   type ErrorResponse,
 } from '@/utils/messaging';
 import { ErrorCode, createAppError } from '@/core/types/errors';
 
 /**
  * Content script entry.
- * P2: Google Forms discovery (read-only). No extraction/fill.
+ * P2: discovery. P3: classification of discovery output.
+ * No Form extraction / fill.
  */
 
 const adapter = createGoogleFormsAdapter();
@@ -59,7 +62,15 @@ function handleMessage(
     }
     case MessageType.DISCOVER_FORM: {
       const response: DiscoverFormResponse = {
-        discovery: buildDiscoveryReport(),
+        discovery: adapter.discoverReport(),
+      };
+      sendResponse(response);
+      return false;
+    }
+    case MessageType.CLASSIFY_FORM: {
+      // Single discovery pass → classify (no duplicate scan beyond classifyReport).
+      const response: ClassifyFormResponse = {
+        classification: adapter.classifyReport(),
       };
       sendResponse(response);
       return false;
@@ -68,7 +79,7 @@ function handleMessage(
       const response: ErrorResponse = {
         error: createAppError(
           ErrorCode.EXTRACTION_FAILED,
-          'Form extraction is not implemented in P2. Use DISCOVER_FORM for DOM candidate diagnostics.',
+          'Form extraction is not implemented in P3. Use DISCOVER_FORM / CLASSIFY_FORM.',
         ),
       };
       sendResponse(response);
@@ -89,6 +100,26 @@ function handleMessage(
 
 chrome.runtime.onMessage.addListener(handleMessage);
 
+function runDiscoveryAndClassificationLogs(): void {
+  if (!adapter.canHandle()) {
+    console.info(
+      '[Google Form AutoFiller] URL matched but adapter canHandle() is false — structural signals missing or page still loading.',
+    );
+    return;
+  }
+
+  // One discovery pass; classification consumes that output.
+  const discovered = adapter.discoverQuestions();
+  const discovery = summarizeDiscoveredQuestions(discovered, {
+    url: location.href,
+    canHandle: true,
+  });
+  logDiscoverySummary(discovery);
+  logClassificationSummary(
+    adapter.classifyFromDiscovered(discovered, location.href),
+  );
+}
+
 const detection = detectGoogleForm();
 if (detection.isGoogleForm) {
   console.info(
@@ -97,10 +128,24 @@ if (detection.isGoogleForm) {
   );
 
   if (adapter.canHandle()) {
-    logDiscoveryReport(adapter.discover());
-  } else {
-    console.info(
-      '[Google Form AutoFiller] URL matched but adapter canHandle() is false — structural signals missing or page still loading.',
+    const discovered = adapter.discoverQuestions();
+    const firstReport = summarizeDiscoveredQuestions(discovered, {
+      url: location.href,
+      canHandle: true,
+    });
+    logDiscoverySummary(firstReport);
+    logClassificationSummary(
+      adapter.classifyFromDiscovered(discovered, location.href),
     );
+
+    if (firstReport.containerCount === 0) {
+      window.setTimeout(() => {
+        runDiscoveryAndClassificationLogs();
+      }, 1500);
+    }
+  } else {
+    window.setTimeout(() => {
+      runDiscoveryAndClassificationLogs();
+    }, 1500);
   }
 }

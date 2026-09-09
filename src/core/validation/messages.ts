@@ -3,6 +3,7 @@ import { UserProfileSchema, type UserProfile } from './profile';
 import type { Form } from '@/core/types/form';
 import type { FormDetectionResult } from '@/core/types/detection';
 import type { DiscoveryReport } from '@/core/types/discovery-report';
+import type { ClassificationReport } from '@/core/types/classification-report';
 import type { AppError } from '@/core/types/errors';
 import { ErrorCode } from '@/core/types/errors';
 
@@ -20,6 +21,7 @@ export const MessageType = {
   DETECT_FORM: 'DETECT_FORM',
   GET_FORM: 'GET_FORM',
   DISCOVER_FORM: 'DISCOVER_FORM',
+  CLASSIFY_FORM: 'CLASSIFY_FORM',
 } as const;
 
 export type MessageTypeName = (typeof MessageType)[keyof typeof MessageType];
@@ -53,6 +55,10 @@ export const DiscoverFormMessageSchema = z.object({
   type: z.literal(MessageType.DISCOVER_FORM),
 });
 
+export const ClassifyFormMessageSchema = z.object({
+  type: z.literal(MessageType.CLASSIFY_FORM),
+});
+
 export const ExtensionMessageSchema = z.discriminatedUnion('type', [
   PingMessageSchema,
   GetExtensionStatusMessageSchema,
@@ -61,6 +67,7 @@ export const ExtensionMessageSchema = z.discriminatedUnion('type', [
   DetectFormMessageSchema,
   GetFormMessageSchema,
   DiscoverFormMessageSchema,
+  ClassifyFormMessageSchema,
 ]);
 
 export type ExtensionMessage = z.infer<typeof ExtensionMessageSchema>;
@@ -103,7 +110,7 @@ export interface PongResponse {
 export interface ExtensionStatusResponse {
   version: string;
   ready: boolean;
-  scope: 'p2-discovery';
+  scope: 'p3-classification';
 }
 
 export interface ProfileResponse {
@@ -126,6 +133,10 @@ export interface DiscoverFormResponse {
   discovery: DiscoveryReport;
 }
 
+export interface ClassifyFormResponse {
+  classification: ClassificationReport;
+}
+
 export interface ErrorResponse {
   error: AppError;
 }
@@ -138,6 +149,7 @@ export type ExtensionResponse =
   | DetectFormResponse
   | GetFormResponse
   | DiscoverFormResponse
+  | ClassifyFormResponse
   | ErrorResponse;
 
 export function isErrorResponse(value: unknown): value is ErrorResponse {

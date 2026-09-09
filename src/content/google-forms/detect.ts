@@ -6,6 +6,7 @@ export interface GoogleFormsPageDetection {
   url: string;
   hasQuestionList: boolean;
   hasQuestionContainers: boolean;
+  hasProviderFallbackContainers: boolean;
   reasons: readonly string[];
 }
 
@@ -18,10 +19,12 @@ export function detectGoogleFormsPage(
 ): GoogleFormsPageDetection {
   const url = doc.location.href;
   const urlOk = isGoogleFormsUrl(url);
-  const questionList = doc.querySelector(GoogleFormsSelectors.questionList);
-  const hasQuestionList = questionList !== null;
+  const hasQuestionList =
+    doc.querySelector(GoogleFormsSelectors.questionList) !== null;
   const hasQuestionContainers =
     doc.querySelector(GoogleFormsSelectors.questionContainer) !== null;
+  const hasProviderFallbackContainers =
+    doc.querySelector(GoogleFormsSelectors.questionContainerFallback) !== null;
 
   const reasons: string[] = [];
   if (!urlOk) {
@@ -33,13 +36,21 @@ export function detectGoogleFormsPage(
   if (!hasQuestionContainers) {
     reasons.push(`No element matching ${GoogleFormsSelectors.questionContainer}`);
   }
+  if (!hasProviderFallbackContainers) {
+    reasons.push(
+      `No fallback element matching ${GoogleFormsSelectors.questionContainerFallback}`,
+    );
+  }
 
-  const canHandle = urlOk && (hasQuestionList || hasQuestionContainers);
+  const canHandle =
+    urlOk &&
+    (hasQuestionList ||
+      hasQuestionContainers ||
+      hasProviderFallbackContainers);
 
-  if (canHandle && reasons.length === 0) {
-    reasons.push('URL and question list/listitem structure present');
-  } else if (canHandle) {
-    reasons.push('URL matched with at least one structural signal');
+  if (canHandle) {
+    reasons.length = 0;
+    reasons.push('URL matched with at least one structural discovery signal');
   }
 
   return {
@@ -47,6 +58,7 @@ export function detectGoogleFormsPage(
     url,
     hasQuestionList,
     hasQuestionContainers,
+    hasProviderFallbackContainers,
     reasons,
   };
 }

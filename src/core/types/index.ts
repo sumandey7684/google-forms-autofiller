@@ -51,3 +51,13 @@ export type {
   DiscoveryQuestionReport,
   DiscoveryReport,
 } from './discovery-report';
+
+export type {
+  ClassifierKind,
+  ClassificationConfidence,
+  ClassifiedQuestion,
+  ClassificationTotals,
+  ClassificationReport,
+} from './classification-report';
+
+export { emptyKindCounts } from './classification-report';

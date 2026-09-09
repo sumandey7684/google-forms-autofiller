@@ -1,35 +1,37 @@
 /**
- * Centralized Google Forms DOM selectors.
+ * Centralized Google Forms DOM selectors and attribute patterns.
  * Prefer semantic/ARIA/structural signals over generated CSS class names.
  * Do not scatter these strings through the codebase.
  */
 
 export const GoogleFormsSelectors = {
-  /**
-   * Primary question list on the respondent view.
-   * Google Forms typically renders questions as a list of listitems.
-   */
+  /** Primary question list on the respondent view. */
   questionList: '[role="list"]',
 
   /**
-   * Candidate question containers.
-   * Not every listitem is a question (header / footer / submit may appear).
+   * Primary candidate question containers.
+   * Header / footer / submit listitems may appear and are filtered via diagnostics.
    */
   questionContainer: '[role="listitem"]',
 
   /**
-   * Candidate question title / prompt text within a container.
+   * Fallback containers when list/listitem structure is absent.
+   * `data-params` is provider-specific and less stable than roles — use only as fallback.
    */
+  questionContainerFallback: '[data-params]',
+
+  /** Candidate question title / prompt. */
   questionHeading: '[role="heading"]',
 
   /**
-   * Answer-control candidates inside a question container.
-   * Intentionally broad for discovery; classification comes later.
+   * Interactive control candidates inside a question container.
+   * Discovery-level only — not semantic question classification.
    */
-  answerControl: [
-    'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="image"]):not([type="reset"])',
+  interactiveControl: [
+    'input:not([type="hidden"])',
     'textarea',
     'select',
+    'button',
     '[role="textbox"]',
     '[role="radio"]',
     '[role="checkbox"]',
@@ -39,24 +41,54 @@ export const GoogleFormsSelectors = {
     '[role="spinbutton"]',
     '[role="slider"]',
     '[role="option"]',
+    '[role="button"]',
     '[contenteditable="true"]',
   ].join(', '),
 
   /**
-   * Non-answer interactive chrome often nested in listitems.
+   * Controls used to locate provider entry IDs (may include hidden inputs).
+   * Hidden inputs are metadata sources only — not treated as interactive answers.
    */
-  chromeControl: 'button, [role="button"], input[type="submit"], input[type="button"]',
+  providerIdControl: 'input[name^="entry."], textarea[name^="entry."], select[name^="entry."], [name^="entry."]',
+
+  /** Required-state attribute probes. */
+  requiredTrue: '[aria-required="true"], [required]',
+  requiredFalse: '[aria-required="false"]',
 } as const;
 
-/** Roles treated as answer-control evidence during discovery. */
-export const ANSWER_CONTROL_ROLES = [
-  'textbox',
-  'radio',
-  'checkbox',
-  'radiogroup',
-  'listbox',
-  'combobox',
-  'spinbutton',
-  'slider',
-  'option',
-] as const;
+/**
+ * Exact `name` attribute pattern for Google Forms entry identifiers.
+ * Requires end-of-string so `entry.123abc` does not partially match.
+ */
+export const ENTRY_NAME_PATTERN = /^entry\.\d+$/;
+
+/**
+ * Discovery-level control categories (DOM shape), NOT semantic question types.
+ * Semantic classification belongs to P3.
+ */
+export const DiscoveryControlKind = {
+  native_input: 'native_input',
+  native_textarea: 'native_textarea',
+  native_select: 'native_select',
+  native_button: 'native_button',
+  aria_textbox: 'aria_textbox',
+  aria_radio: 'aria_radio',
+  aria_checkbox: 'aria_checkbox',
+  aria_radiogroup: 'aria_radiogroup',
+  aria_listbox: 'aria_listbox',
+  aria_combobox: 'aria_combobox',
+  aria_option: 'aria_option',
+  aria_spinbutton: 'aria_spinbutton',
+  aria_slider: 'aria_slider',
+  aria_button: 'aria_button',
+  contenteditable: 'contenteditable',
+  other_interactive: 'other_interactive',
+} as const;
+
+export type DiscoveryControlKind =
+  (typeof DiscoveryControlKind)[keyof typeof DiscoveryControlKind];
+
+export type DiscoverySignal =
+  | 'role-listitem'
+  | 'data-params-fallback'
+  | 'none';

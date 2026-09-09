@@ -10,7 +10,7 @@ Google Form AutoFiller helps users fill Google Forms for job and internship appl
 - a review step before fill
 - **manual** submission by the user
 
-This document describes the codebase after **P2 (Google Forms discovery)**.
+This document describes the codebase after **P3 (Google Forms classification)**.
 
 ## 2. P0 foundation (complete)
 
@@ -19,7 +19,7 @@ This document describes the codebase after **P2 (Google Forms discovery)**.
 - Chrome messaging plumbing
 - Zod `UserProfile` + `chrome.storage.local` helpers
 
-## 3. P1 domain model (this phase)
+## 3. P1 domain model (complete)
 
 P1 freezes the **shared domain contracts** later phases implement against:
 
@@ -83,6 +83,7 @@ Central contract: `MessageType` + Zod `ExtensionMessageSchema` in `core/validati
 | `GET_PROFILE` / `SAVE_PROFILE` | background | storage I/O |
 | `DETECT_FORM` | content | URL/host heuristic only |
 | `DISCOVER_FORM` | content | P2 read-only DOM candidate diagnostics |
+| `CLASSIFY_FORM` | content | P3 classification report (no Form) |
 | `GET_FORM` | content | still returns `EXTRACTION_FAILED` (no fake Form) |
 
 Runtime validation: `isExtensionMessage` / `AppErrorSchema` at extension boundaries. Errors use `{ error: AppError }`, not bare strings.
@@ -98,14 +99,36 @@ interface FormAdapter {
 }
 ```
 
-A `GoogleFormsAdapter` in `src/content/google-forms/` implements `canHandle()` plus a P2-only `discover()` helper. `extract` / `fill` still throw typed errors.
+### P2 — DOM discovery (read-only)
+
+`src/content/google-forms/` discovers candidate question containers and interactive controls.
+
+- **Does:** locate containers/controls, title/description candidates, conservative required state, provider `entry.*` ids when present, safe diagnostics
+- **Does not:** classify semantic question types, build core `Form`, mutate the DOM, fill, or submit
+- **DOM types** (`DiscoveredQuestion`, `DiscoveredControl`) stay in the content layer; core stays DOM-free
+- **Provider ids** (`entry.123`) are distinct from internal `discovery:q-N` ids
+- **Diagnostics** omit answer values; logging is optional via `DISCOVERY_DEBUG_LOGGING`
+
+### P3 — Question classification (deterministic)
+
+`classifyQuestion(discovered)` maps discovery → `ClassifiedQuestion` (serializable; no DOM).
+
+- Uses P2 control kinds / structural attributes only
+- Conservative: prefer `unknown` over false positives
+- Distinguishes `non_question` and `unsupported` outside the core `Question` union
+- Does **not** construct core `Form` / `Question` (P4)
+
+See [google-forms-classification.md](./google-forms-classification.md).
+
+`GoogleFormsAdapter` exposes `discoverQuestions` / `discoverReport` / `classifyDiscovered` / `classifyReport`. `extract` / `fill` still throw.
+
+Flow: DOM discovery → **classification** → P4 normalized `Form` extraction.
 
 Placeholders `content/extractor.ts` and `content/filler.ts` remain unimplemented.
 
 ## 8. Intentionally NOT implemented yet
 
-- Question classification / mapping discovery → `Question`
-- Full `Form` extraction (`GET_FORM`)
+- Full `Form` extraction (`GET_FORM`) / P4 normalization
 - Autofill / DOM writes
 - Profile ↔ question matching engine
 - AI answer generation
@@ -113,13 +136,13 @@ Placeholders `content/extractor.ts` and `content/filler.ts` remain unimplemented
 - Authentication / backend / Google Docs
 - Automatic submission (permanently out of scope)
 
-## 9. Planned P3 → P5 evolution
+## 9. Planned P4 → P5 evolution
 
 | Phase | Focus |
 | --- | --- |
-| **P2** | ✅ Google Forms detection & candidate discovery (no classification) |
-| **P3** | Classify discovery → `Question` / `Form`; deterministic matching |
-| **P4** | Fill adapter (`FillPlan` → DOM) + `FillResult`; review before fill |
-| **P5** | Optional AI for unresolved questions; still manual submit |
+| **P2** | ✅ Google Forms detection & candidate discovery |
+| **P3** | ✅ Deterministic question classification |
+| **P4** | Normalize discovery+classification → core `Form` / `Question` |
+| **P5** | Fill adapter + review; optional AI later; manual submit |
 
 Each phase should extend adapters/engines without redesigning the P1 core model.
