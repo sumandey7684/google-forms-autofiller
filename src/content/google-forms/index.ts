@@ -46,4 +46,17 @@ export {
   logDiscoveryReport,
   DISCOVERY_DEBUG_LOGGING,
 } from './diagnostics';
+export {
+  extractForm,
+  logExtractionSummary,
+  type ExtractFormMetadata,
+} from './extract';
+export type {
+  ExtractionWarningCode,
+  ExtractionWarning,
+  ExtractionQuestionDiag,
+  ExtractionTotals,
+  ExtractionReport,
+  ExtractionResult,
+} from '@/core/types/extraction-report';
 export { GoogleFormsAdapter, createGoogleFormsAdapter } from './adapter';

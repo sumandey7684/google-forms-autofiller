@@ -32,7 +32,13 @@ interface QuestionBase {
   id: string;
   text: string;
   description?: string;
-  required: boolean;
+  /**
+   * Required when known.
+   * - `true` — known required
+   * - `false` — known optional
+   * - omitted / undefined — unknown (must NOT be treated as optional)
+   */
+  required?: boolean;
   /** Owning section id when the form is sectioned. */
   sectionId?: string;
   metadata?: QuestionMetadata;

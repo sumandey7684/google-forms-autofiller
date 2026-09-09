@@ -58,5 +58,9 @@ Classifier may read structural attributes (`type`, `role`) from discovered contr
 
 ## Smoke
 
+```bash
+pnpm run p3-classification-smoke
+```
+
 - Fixture: `fixtures/p3-classification.html`
-- Script: `scripts/p3-classification-smoke.ts` (ephemeral `linkedom` + `tsx`)
+- Script: `scripts/p3-classification-smoke.ts`

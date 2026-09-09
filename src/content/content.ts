@@ -3,7 +3,9 @@ import {
   createGoogleFormsAdapter,
   logDiscoverySummary,
   logClassificationSummary,
+  logExtractionSummary,
   summarizeDiscoveredQuestions,
+  summarizeClassification,
 } from './google-forms';
 import {
   MessageType,
@@ -14,14 +16,16 @@ import {
   type DetectFormResponse,
   type DiscoverFormResponse,
   type ClassifyFormResponse,
+  type GetFormResponse,
+  type ExtractFormResponse,
   type ErrorResponse,
 } from '@/utils/messaging';
-import { ErrorCode, createAppError } from '@/core/types/errors';
+import { ErrorCode, createAppError, isAppError } from '@/core/types/errors';
 
 /**
  * Content script entry.
- * P2: discovery. P3: classification of discovery output.
- * No Form extraction / fill.
+ * P2 discovery → P3 classification → P4 Form extraction.
+ * No fill / navigation.
  */
 
 const adapter = createGoogleFormsAdapter();
@@ -68,7 +72,6 @@ function handleMessage(
       return false;
     }
     case MessageType.CLASSIFY_FORM: {
-      // Single discovery pass → classify (no duplicate scan beyond classifyReport).
       const response: ClassifyFormResponse = {
         classification: adapter.classifyReport(),
       };
@@ -76,13 +79,46 @@ function handleMessage(
       return false;
     }
     case MessageType.GET_FORM: {
-      const response: ErrorResponse = {
-        error: createAppError(
-          ErrorCode.EXTRACTION_FAILED,
-          'Form extraction is not implemented in P3. Use DISCOVER_FORM / CLASSIFY_FORM.',
-        ),
-      };
-      sendResponse(response);
+      void adapter
+        .extract()
+        .then((form) => {
+          const response: GetFormResponse = { form };
+          sendResponse(response);
+        })
+        .catch((error: unknown) => {
+          const response: ErrorResponse = {
+            error: isAppError(error)
+              ? error
+              : createAppError(
+                  ErrorCode.EXTRACTION_FAILED,
+                  error instanceof Error
+                    ? error.message
+                    : 'Form extraction failed',
+                ),
+          };
+          sendResponse(response);
+        });
+      return true;
+    }
+    case MessageType.EXTRACT_FORM: {
+      try {
+        const response: ExtractFormResponse = {
+          extraction: adapter.extractResult(),
+        };
+        sendResponse(response);
+      } catch (error: unknown) {
+        const response: ErrorResponse = {
+          error: isAppError(error)
+            ? error
+            : createAppError(
+                ErrorCode.EXTRACTION_FAILED,
+                error instanceof Error
+                  ? error.message
+                  : 'Form extraction failed',
+              ),
+        };
+        sendResponse(response);
+      }
       return false;
     }
     default: {
@@ -100,7 +136,7 @@ function handleMessage(
 
 chrome.runtime.onMessage.addListener(handleMessage);
 
-function runDiscoveryAndClassificationLogs(): void {
+function runPipelineLogs(): void {
   if (!adapter.canHandle()) {
     console.info(
       '[Google Form AutoFiller] URL matched but adapter canHandle() is false — structural signals missing or page still loading.',
@@ -108,16 +144,23 @@ function runDiscoveryAndClassificationLogs(): void {
     return;
   }
 
-  // One discovery pass; classification consumes that output.
+  // One discovery pass → classify → extract.
   const discovered = adapter.discoverQuestions();
   const discovery = summarizeDiscoveredQuestions(discovered, {
     url: location.href,
     canHandle: true,
   });
   logDiscoverySummary(discovery);
+
+  const classified = adapter.classifyDiscovered(discovered);
   logClassificationSummary(
-    adapter.classifyFromDiscovered(discovered, location.href),
+    summarizeClassification(classified, location.href),
   );
+
+  const extraction = adapter.extractFromDiscovered(discovered, classified, {
+    url: location.href,
+  });
+  logExtractionSummary(extraction.report);
 }
 
 const detection = detectGoogleForm();
@@ -134,18 +177,25 @@ if (detection.isGoogleForm) {
       canHandle: true,
     });
     logDiscoverySummary(firstReport);
+
+    const classified = adapter.classifyDiscovered(discovered);
     logClassificationSummary(
-      adapter.classifyFromDiscovered(discovered, location.href),
+      summarizeClassification(classified, location.href),
+    );
+    logExtractionSummary(
+      adapter.extractFromDiscovered(discovered, classified, {
+        url: location.href,
+      }).report,
     );
 
     if (firstReport.containerCount === 0) {
       window.setTimeout(() => {
-        runDiscoveryAndClassificationLogs();
+        runPipelineLogs();
       }, 1500);
     }
   } else {
     window.setTimeout(() => {
-      runDiscoveryAndClassificationLogs();
+      runPipelineLogs();
     }, 1500);
   }
 }

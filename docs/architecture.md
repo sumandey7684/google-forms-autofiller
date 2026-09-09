@@ -10,7 +10,7 @@ Google Form AutoFiller helps users fill Google Forms for job and internship appl
 - a review step before fill
 - **manual** submission by the user
 
-This document describes the codebase after **P3 (Google Forms classification)**.
+This document describes the codebase after **P4 (Form extraction / normalization)**.
 
 ## 2. P0 foundation (complete)
 
@@ -45,6 +45,7 @@ Discovery details: [google-forms-discovery.md](./google-forms-discovery.md).
 - **Form** — id, title, description, url, sections, extractedAt
 - **Section** — id, title, description, questions
 - **Question** — discriminated union by `type` (`text`, `paragraph`, `multiple_choice`, `checkbox`, `dropdown`, `linear_scale`, `date`, `time`, `unknown`)
+- **`required?: boolean`** — `true` / `false` when known; **omitted when unknown** (must not be collapsed to optional)
 - **QuestionOption** — stable `id` + `label` (not array index)
 - **FormAnswer** — questionId, discriminated `AnswerValue`, source, status, optional confidence
 - **FillPlan** / **FillOperation** — DOM-independent fill intent
@@ -84,7 +85,8 @@ Central contract: `MessageType` + Zod `ExtensionMessageSchema` in `core/validati
 | `DETECT_FORM` | content | URL/host heuristic only |
 | `DISCOVER_FORM` | content | P2 read-only DOM candidate diagnostics |
 | `CLASSIFY_FORM` | content | P3 classification report (no Form) |
-| `GET_FORM` | content | still returns `EXTRACTION_FAILED` (no fake Form) |
+| `GET_FORM` | content | P4 normalized `Form` |
+| `EXTRACT_FORM` | content | P4 `{ form, report }` |
 
 Runtime validation: `isExtensionMessage` / `AppErrorSchema` at extension boundaries. Errors use `{ error: AppError }`, not bare strings.
 
@@ -120,29 +122,45 @@ interface FormAdapter {
 
 See [google-forms-classification.md](./google-forms-classification.md).
 
-`GoogleFormsAdapter` exposes `discoverQuestions` / `discoverReport` / `classifyDiscovered` / `classifyReport`. `extract` / `fill` still throw.
+### P4 — Form extraction / normalization
 
-Flow: DOM discovery → **classification** → P4 normalized `Form` extraction.
+`extractForm(discovered, classified, metadata)` builds the existing core `Form`.
 
-Placeholders `content/extractor.ts` and `content/filler.ts` remain unimplemented.
+- Consumes P2/P3 outputs only (no third discovery engine)
+- Filters `non_question` / `unsupported` out of `Form.questions` (unsupported retained in `ExtractionReport` with reason/signals)
+- Preserves `unknown` as `Question.type = 'unknown'`
+- Preserves required tri-state via `required?: boolean`
+- Scope: currently visible DOM only (`ExtractionReport.scope = current_visible_dom`)
+- DOM-free, JSON-serializable result + `ExtractionReport`
+- `GET_FORM` / `EXTRACT_FORM` return real extraction results
+- `fill` still throws (P5)
+
+See [google-forms-extraction.md](./google-forms-extraction.md).
+
+`GoogleFormsAdapter` exposes discovery, classification, and extraction helpers.
+
+Flow: DOM discovery → classification → **normalized Form** → P5 fill.
+
+Placeholders `content/extractor.ts` and `content/filler.ts` remain thin stubs;
+Google Forms logic lives under `content/google-forms/`.
 
 ## 8. Intentionally NOT implemented yet
 
-- Full `Form` extraction (`GET_FORM`) / P4 normalization
-- Autofill / DOM writes
+- Autofill / DOM writes (P5)
 - Profile ↔ question matching engine
 - AI answer generation
 - Review UI beyond the status popup
 - Authentication / backend / Google Docs
 - Automatic submission (permanently out of scope)
+- Multi-section navigation / Next-Back traversal
 
-## 9. Planned P4 → P5 evolution
+## 9. Planned P5 evolution
 
 | Phase | Focus |
 | --- | --- |
 | **P2** | ✅ Google Forms detection & candidate discovery |
 | **P3** | ✅ Deterministic question classification |
-| **P4** | Normalize discovery+classification → core `Form` / `Question` |
+| **P4** | ✅ Normalize discovery+classification → core `Form` / `Question` |
 | **P5** | Fill adapter + review; optional AI later; manual submit |
 
 Each phase should extend adapters/engines without redesigning the P1 core model.

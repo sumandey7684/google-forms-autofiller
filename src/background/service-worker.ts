@@ -37,7 +37,7 @@ async function handleMessage(
       const response: ExtensionStatusResponse = {
         version: EXTENSION_VERSION,
         ready: true,
-        scope: 'p3-classification',
+        scope: 'p4-extraction',
       };
       return response;
     }
@@ -54,7 +54,8 @@ async function handleMessage(
     case MessageType.DETECT_FORM:
     case MessageType.GET_FORM:
     case MessageType.DISCOVER_FORM:
-    case MessageType.CLASSIFY_FORM: {
+    case MessageType.CLASSIFY_FORM:
+    case MessageType.EXTRACT_FORM: {
       const response: ErrorResponse = {
         error: createAppError(
           ErrorCode.INVALID_REQUEST,
@@ -104,5 +105,5 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 });
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.info('[Google Form AutoFiller] Service worker installed (P2 discovery).');
+  console.info('[Google Form AutoFiller] Service worker installed (P4 extraction).');
 });

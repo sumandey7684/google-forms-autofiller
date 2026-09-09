@@ -120,5 +120,14 @@ Regression fixtures/scripts (no permanent test-runner dependency):
 
 - `fixtures/p2-discovery-audit.html` + `scripts/p2-discovery-smoke.ts`
 - Companion P3: `fixtures/p3-classification.html` + `scripts/p3-classification-smoke.ts`
+- Companion P4: `fixtures/p4-extraction.html` + `scripts/p4-extraction-smoke.ts`
 
-Run with ephemeral `linkedom` + `tsx`, then remove those packages.
+Run with:
+
+```bash
+pnpm run p2-discovery-smoke
+pnpm run p3-classification-smoke
+pnpm run p4-extraction-smoke
+```
+
+(`linkedom` + `tsx` are smoke-only devDependencies; not a permanent unit-test framework.)

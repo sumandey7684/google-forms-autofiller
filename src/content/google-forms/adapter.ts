@@ -2,6 +2,7 @@ import type { FormAdapter } from '@/core/types/adapter';
 import type { Form } from '@/core/types/form';
 import type { FillPlan, FillResult } from '@/core/types/fill';
 import type { ClassificationReport } from '@/core/types/classification-report';
+import type { ExtractionReport, ExtractionResult } from '@/core/types/extraction-report';
 import { ErrorCode, createAppError } from '@/core/types/errors';
 import { canHandleGoogleFormsPage } from './detect';
 import { discoverQuestionContainers } from './discovery';
@@ -10,13 +11,14 @@ import {
   classifyQuestions,
   summarizeClassification,
 } from './classification';
+import { extractForm } from './extract';
 import type { DiscoveredQuestion, DiscoveryReport } from './types';
 import type { ClassifiedQuestion } from '@/core/types/classification-report';
 
 /**
  * Google Forms adapter boundary.
- * P2: discovery. P3: classification of discovery output.
- * extract/fill remain unimplemented.
+ * P2 discovery → P3 classification → P4 Form extraction.
+ * fill remains unimplemented (P5).
  */
 export class GoogleFormsAdapter implements FormAdapter {
   readonly id = 'google-forms';
@@ -38,18 +40,12 @@ export class GoogleFormsAdapter implements FormAdapter {
     return this.discoverReport();
   }
 
-  /**
-   * P3: classify previously discovered questions (does not re-scan unrelated DOM).
-   */
   classifyDiscovered(
     questions: readonly DiscoveredQuestion[],
   ): ClassifiedQuestion[] {
     return classifyQuestions(questions);
   }
 
-  /**
-   * Classify an already-discovered set (preferred — no second DOM scan).
-   */
   classifyFromDiscovered(
     questions: readonly DiscoveredQuestion[],
     url: string = location.href,
@@ -57,33 +53,103 @@ export class GoogleFormsAdapter implements FormAdapter {
     return summarizeClassification(this.classifyDiscovered(questions), url);
   }
 
-  /**
-   * Discover then classify in one pass for debug/messaging.
-   * Classification still consumes discovery objects — no parallel DOM strategy.
-   */
   classifyReport(root: ParentNode = document): ClassificationReport {
     const discovered = this.discoverQuestions(root);
-    const url =
-      root instanceof Document
-        ? root.location.href
-        : root instanceof Element
-          ? root.ownerDocument.location.href
-          : location.href;
-    return this.classifyFromDiscovered(discovered, url);
+    return this.classifyFromDiscovered(discovered, this.resolveUrl(root));
+  }
+
+  /**
+   * P4: normalize previously discovered + classified questions (no extra DOM strategy).
+   */
+  extractFromDiscovered(
+    discovered: readonly DiscoveredQuestion[],
+    classified: readonly ClassifiedQuestion[],
+    options: {
+      url?: string;
+      extractedAt?: string;
+      formTitle?: string;
+      formDescription?: string;
+      formId?: string;
+    } = {},
+  ): ExtractionResult {
+    const metadata: Parameters<typeof extractForm>[2] = {
+      url: options.url ?? location.href,
+      extractedAt: options.extractedAt ?? new Date().toISOString(),
+    };
+    if (options.formTitle !== undefined) {
+      metadata.formTitle = options.formTitle;
+    }
+    if (options.formDescription !== undefined) {
+      metadata.formDescription = options.formDescription;
+    }
+    if (options.formId !== undefined) {
+      metadata.formId = options.formId;
+    }
+    return extractForm(discovered, classified, metadata);
+  }
+
+  /**
+   * Discover → classify → extract in one controlled pass.
+   */
+  extractResult(root: ParentNode = document): ExtractionResult {
+    const discovered = this.discoverQuestions(root);
+    const classified = this.classifyDiscovered(discovered);
+    const url = this.resolveUrl(root);
+    const formTitle = this.readPageTitle(root);
+    if (formTitle) {
+      return this.extractFromDiscovered(discovered, classified, {
+        url,
+        formTitle,
+      });
+    }
+    return this.extractFromDiscovered(discovered, classified, { url });
+  }
+
+  extractReport(root: ParentNode = document): ExtractionReport {
+    return this.extractResult(root).report;
   }
 
   async extract(): Promise<Form> {
-    throw createAppError(
-      ErrorCode.EXTRACTION_FAILED,
-      'Google Forms extract() is not implemented in P3. Classification only.',
-    );
+    if (!this.canHandle()) {
+      throw createAppError(
+        ErrorCode.FORM_NOT_FOUND,
+        'Google Forms adapter cannot handle this page.',
+      );
+    }
+    return this.extractResult().form;
   }
 
   async fill(_plan: FillPlan): Promise<FillResult> {
     throw createAppError(
       ErrorCode.FILL_FAILED,
-      'Google Forms fill() is not implemented in P3. Classification only.',
+      'Google Forms fill() is not implemented in P4. Extraction only.',
     );
+  }
+
+  private resolveUrl(root: ParentNode): string {
+    if (root instanceof Document) {
+      return root.location?.href ?? location.href;
+    }
+    if (root instanceof Element) {
+      return root.ownerDocument.location?.href ?? location.href;
+    }
+    return location.href;
+  }
+
+  /** Structural page title only — never respondent/account fields. */
+  private readPageTitle(root: ParentNode): string {
+    const doc =
+      root instanceof Document
+        ? root
+        : root instanceof Element
+          ? root.ownerDocument
+          : document;
+    const title = doc.querySelector('title')?.textContent?.trim() ?? '';
+    if (!title) {
+      return '';
+    }
+    // Strip common Google Forms suffix when present.
+    return title.replace(/\s*-\s*Google\s+Forms\s*$/i, '').trim();
   }
 }
 

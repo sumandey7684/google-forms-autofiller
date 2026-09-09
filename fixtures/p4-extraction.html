@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>P4 Extraction Fixture</title>
+  </head>
+  <body>
+    <div role="list" id="classify-list">
+      <!-- 1 text -->
+      <div role="listitem" id="c-text">
+        <div role="heading">Full Name</div>
+        <input type="text" aria-label="Full Name" name="entry.100" />
+      </div>
+
+      <!-- 2 paragraph -->
+      <div role="listitem" id="c-para">
+        <div role="heading">About you</div>
+        <textarea aria-label="About you"></textarea>
+      </div>
+
+      <!-- 3 multiple choice -->
+      <div role="listitem" id="c-mc">
+        <div role="heading">Are you available?</div>
+        <div role="radiogroup" aria-label="Are you available?">
+          <div role="radio" aria-label="Yes"></div>
+          <div role="radio" aria-label="No"></div>
+        </div>
+      </div>
+
+      <!-- 4 checkbox -->
+      <div role="listitem" id="c-check">
+        <div role="heading">Skills</div>
+        <div role="checkbox" aria-label="TypeScript"></div>
+        <div role="checkbox" aria-label="React"></div>
+      </div>
+
+      <!-- 5 dropdown (combobox + options) -->
+      <div role="listitem" id="c-drop">
+        <div role="heading">Timezone</div>
+        <div role="combobox" aria-label="Timezone"></div>
+        <div role="listbox">
+          <div role="option" aria-label="UTC"></div>
+          <div role="option" aria-label="IST"></div>
+        </div>
+      </div>
+
+      <!-- 5b native select -->
+      <div role="listitem" id="c-select">
+        <div role="heading">Country</div>
+        <select aria-label="Country">
+          <option>IN</option>
+          <option>US</option>
+        </select>
+      </div>
+
+      <!-- weak combobox alone -->
+      <div role="listitem" id="c-weak-combo">
+        <div role="heading">Vague picker</div>
+        <div role="combobox" aria-label="Vague picker"></div>
+      </div>
+
+      <!-- mixed radio + checkbox -->
+      <div role="listitem" id="c-mixed">
+        <div role="heading">Mixed</div>
+        <div role="radio" aria-label="A"></div>
+        <div role="checkbox" aria-label="B"></div>
+      </div>
+
+      <!-- non-consecutive numeric radios → multiple_choice -->
+      <div role="listitem" id="c-numeric-gap">
+        <div role="heading">Pick a number</div>
+        <div role="radiogroup">
+          <div role="radio" aria-label="1"></div>
+          <div role="radio" aria-label="2"></div>
+          <div role="radio" aria-label="5"></div>
+        </div>
+      </div>
+
+      <!-- 6 date -->
+      <div role="listitem" id="c-date">
+        <div role="heading">Start date</div>
+        <input type="date" aria-label="Start date" />
+      </div>
+
+      <!-- 7 time -->
+      <div role="listitem" id="c-time">
+        <div role="heading">Start time</div>
+        <input type="time" aria-label="Start time" />
+      </div>
+
+      <!-- 8 linear scale -->
+      <div role="listitem" id="c-scale">
+        <div role="heading">Interest</div>
+        <div role="radiogroup" aria-label="Interest">
+          <div role="radio" aria-label="1"></div>
+          <div role="radio" aria-label="2"></div>
+          <div role="radio" aria-label="3"></div>
+          <div role="radio" aria-label="4"></div>
+          <div role="radio" aria-label="5"></div>
+        </div>
+      </div>
+
+      <!-- 9 non-question header -->
+      <div role="listitem" id="c-header">
+        <div role="heading">Section A — Background</div>
+      </div>
+
+      <!-- 10 submit/navigation -->
+      <div role="listitem" id="c-submit">
+        <div role="heading">Submit</div>
+        <button type="button">Submit</button>
+      </div>
+
+      <!-- 11 ambiguous mixed controls -->
+      <div role="listitem" id="c-ambiguous">
+        <div role="heading">Weird widget</div>
+        <input type="text" aria-label="A" />
+        <textarea aria-label="B"></textarea>
+      </div>
+
+      <!-- 12 file upload unsupported -->
+      <div role="listitem" id="c-file">
+        <div role="heading">Upload resume</div>
+        <input type="file" aria-label="Upload resume" />
+      </div>
+
+      <!-- 13 grid-like unsupported -->
+      <div role="listitem" id="c-grid">
+        <div role="heading">Rate each skill</div>
+        <div role="radiogroup" aria-label="TypeScript">
+          <div role="radio" aria-label="1"></div>
+          <div role="radio" aria-label="2"></div>
+        </div>
+        <div role="radiogroup" aria-label="React">
+          <div role="radio" aria-label="1"></div>
+          <div role="radio" aria-label="2"></div>
+        </div>
+      </div>
+
+      <!-- 14 malformed incomplete -->
+      <div role="listitem" id="c-incomplete">
+        <input type="text" />
+      </div>
+
+      <!-- Negative: title says date but control is text -->
+      <div role="listitem" id="c-date-title-text">
+        <div role="heading">What is your birth date?</div>
+        <input type="text" aria-label="birth date text" />
+      </div>
+
+      <!-- Negative: title says time but control is text -->
+      <div role="listitem" id="c-time-title-text">
+        <div role="heading">Preferred interview time</div>
+        <input type="text" aria-label="interview time text" />
+      </div>
+
+      <!-- Negative: arbitrary buttons -->
+      <div role="listitem" id="c-three-buttons">
+        <div role="heading">Actions</div>
+        <button type="button">One</button>
+        <button type="button">Two</button>
+        <button type="button">Three</button>
+      </div>
+
+      <!-- Negative: radios with non-numeric labels are MC not scale -->
+      <div role="listitem" id="c-five-radios-labels">
+        <div role="heading">Pick one</div>
+        <div role="radiogroup">
+          <div role="radio" aria-label="Alpha"></div>
+          <div role="radio" aria-label="Bravo"></div>
+          <div role="radio" aria-label="Charlie"></div>
+          <div role="radio" aria-label="Delta"></div>
+          <div role="radio" aria-label="Echo"></div>
+        </div>
+      </div>
+
+      <!-- Required true -->
+      <div role="listitem" id="c-req-true">
+        <div role="heading">Zulu required field</div>
+        <input type="text" aria-label="Zulu" name="entry.901" aria-required="true" />
+      </div>
+
+      <!-- Required false -->
+      <div role="listitem" id="c-req-false">
+        <div role="heading">Yankee optional field</div>
+        <input type="text" aria-label="Yankee" name="entry.902" aria-required="false" />
+      </div>
+
+      <!-- Non-alphabetical option order must be preserved -->
+      <div role="listitem" id="c-opt-order">
+        <div role="heading">Zebra choice</div>
+        <div role="radiogroup">
+          <div role="radio" aria-label="Option C"></div>
+          <div role="radio" aria-label="Option A"></div>
+          <div role="radio" aria-label="Option B"></div>
+        </div>
+      </div>
+
+      <!-- Duplicate + unicode + whitespace labels -->
+      <div role="listitem" id="c-opt-dup">
+        <div role="heading">Unicode options</div>
+        <div role="checkbox" aria-label="  Same  "></div>
+        <div role="checkbox" aria-label="Same"></div>
+        <div role="checkbox" aria-label="日本語"></div>
+        <div role="checkbox" aria-label="A &amp; B"></div>
+      </div>
+    </div>
+  </body>
+</html>

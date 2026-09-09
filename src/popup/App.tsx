@@ -46,7 +46,7 @@ export function App() {
     <main className="popup">
       <header className="popup__header">
         <h1 className="popup__title">Google Form AutoFiller</h1>
-        <p className="popup__subtitle">P3 classification</p>
+        <p className="popup__subtitle">P4 extraction</p>
       </header>
 
       <section className="popup__section" aria-live="polite">
@@ -73,8 +73,8 @@ export function App() {
       </section>
 
       <p className="popup__note">
-        Domain model, discovery, and question classification are in place. Full Form
-        extraction, matching, AI answers, and autofill are not implemented yet.
+        Discovery, classification, and Form extraction are in place. Matching, AI
+        answers, and autofill are not implemented yet.
       </p>
     </main>
   );

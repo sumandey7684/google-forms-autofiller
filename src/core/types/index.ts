@@ -61,3 +61,12 @@ export type {
 } from './classification-report';
 
 export { emptyKindCounts } from './classification-report';
+
+export type {
+  ExtractionWarningCode,
+  ExtractionWarning,
+  ExtractionQuestionDiag,
+  ExtractionTotals,
+  ExtractionReport,
+  ExtractionResult,
+} from './extraction-report';

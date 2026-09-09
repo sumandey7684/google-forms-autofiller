@@ -16,6 +16,7 @@ export {
   type GetFormResponse,
   type DiscoverFormResponse,
   type ClassifyFormResponse,
+  type ExtractFormResponse,
   type ErrorResponse,
   type ExtensionResponse,
 } from './messages';

@@ -9,7 +9,10 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b --pretty false",
     "preview": "vite preview",
-    "clean": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true });\""
+    "clean": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true });\"",
+    "p2-discovery-smoke": "tsx --tsconfig tsconfig.app.json scripts/p2-discovery-smoke.ts",
+    "p3-classification-smoke": "tsx --tsconfig tsconfig.app.json scripts/p3-classification-smoke.ts",
+    "p4-extraction-smoke": "tsx --tsconfig tsconfig.app.json scripts/p4-extraction-smoke.ts"
   },
   "dependencies": {
     "react": "^19.0.0",
@@ -23,6 +26,8 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
+    "linkedom": "^0.18.13",
+    "tsx": "^4.23.13",
     "typescript": "^5.8.2",
     "vite": "^6.2.0"
   }
