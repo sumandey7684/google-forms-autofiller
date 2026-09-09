@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mock Google Forms structure</title>
+  </head>
+  <body>
+    <div role="list">
+      <div role="listitem">
+        <div role="heading">Full name</div>
+        <div>Help text for name</div>
+        <input type="text" aria-label="Full name" name="entry.name" />
+      </div>
+      <div role="listitem">
+        <div role="heading">About you</div>
+        <textarea aria-label="About you"></textarea>
+      </div>
+      <div role="listitem">
+        <div role="heading">Favorite color</div>
+        <div role="radiogroup" aria-label="Favorite color">
+          <div role="radio" aria-label="Red"></div>
+          <div role="radio" aria-label="Blue"></div>
+        </div>
+      </div>
+      <div role="listitem">
+        <div role="heading">Skills</div>
+        <div role="checkbox" aria-label="TypeScript"></div>
+        <div role="checkbox" aria-label="React"></div>
+      </div>
+      <div role="listitem">
+        <div role="heading">Header only</div>
+        <button type="button">Submit</button>
+      </div>
+    </div>
+  </body>
+</html>

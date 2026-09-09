@@ -1,0 +1,20 @@
+export { UserProfileSchema, type UserProfile } from './profile';
+export {
+  MessageType,
+  ExtensionMessageSchema,
+  AppErrorSchema,
+  toAppError,
+  isExtensionMessage,
+  isErrorResponse,
+  type MessageTypeName,
+  type ExtensionMessage,
+  type PongResponse,
+  type ExtensionStatusResponse,
+  type ProfileResponse,
+  type SaveProfileResponse,
+  type DetectFormResponse,
+  type GetFormResponse,
+  type DiscoverFormResponse,
+  type ErrorResponse,
+  type ExtensionResponse,
+} from './messages';
