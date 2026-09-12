@@ -219,9 +219,10 @@ function runPipelineLogs(): void {
     summarizeClassification(classified, location.href),
   );
 
-  const extraction = adapter.extractFromDiscovered(discovered, classified, {
-    url: location.href,
-  });
+  const extraction = adapter.extractCurrentFromDiscovered(
+    discovered,
+    classified,
+  );
   logExtractionSummary(extraction.report);
 }
 
@@ -245,9 +246,7 @@ if (detection.isGoogleForm) {
       summarizeClassification(classified, location.href),
     );
     logExtractionSummary(
-      adapter.extractFromDiscovered(discovered, classified, {
-        url: location.href,
-      }).report,
+      adapter.extractCurrentFromDiscovered(discovered, classified).report,
     );
 
     if (firstReport.containerCount === 0) {

@@ -37,6 +37,7 @@ g.HTMLOptionElement = window.HTMLOptionElement;
 const {
   discoverQuestionContainers,
   classifyQuestions,
+  createGoogleFormsAdapter,
   extractForm,
   getFormQuestions,
 } = await import('../src/content/google-forms/index.ts').then(async (mod) => {
@@ -316,6 +317,21 @@ check('semantic content identical when only extractedAt differs', () => {
   delete (a as { extractedAt?: string }).extractedAt;
   delete (b as { extractedAt?: string }).extractedAt;
   assert.equal(JSON.stringify(a), JSON.stringify(b));
+});
+
+check('one-pass adapter extraction includes available page title', () => {
+  const currentPageResult = createGoogleFormsAdapter().extractCurrentFromDiscovered(
+    discovered,
+    classified,
+    document,
+  );
+  assert.equal(currentPageResult.form.title, 'P4 Extraction Fixture');
+  assert.equal(
+    currentPageResult.report.warnings.some(
+      (warning) => warning.code === 'form_title_missing',
+    ),
+    false,
+  );
 });
 
 check('no DOM mutation of fixture structure', () => {

@@ -95,20 +95,29 @@ export class GoogleFormsAdapter implements FormAdapter {
   }
 
   /**
+   * Complete a one-pass extraction with metadata from the current page.
+   * Used when discovery/classification have already run (for example diagnostics).
+   */
+  extractCurrentFromDiscovered(
+    discovered: readonly DiscoveredQuestion[],
+    classified: readonly ClassifiedQuestion[],
+    root: ParentNode = document,
+  ): ExtractionResult {
+    const url = this.resolveUrl(root);
+    const formTitle = this.readPageTitle(root);
+    return this.extractFromDiscovered(discovered, classified, {
+      url,
+      ...(formTitle ? { formTitle } : {}),
+    });
+  }
+
+  /**
    * Discover → classify → extract in one controlled pass.
    */
   extractResult(root: ParentNode = document): ExtractionResult {
     const discovered = this.discoverQuestions(root);
     const classified = this.classifyDiscovered(discovered);
-    const url = this.resolveUrl(root);
-    const formTitle = this.readPageTitle(root);
-    if (formTitle) {
-      return this.extractFromDiscovered(discovered, classified, {
-        url,
-        formTitle,
-      });
-    }
-    return this.extractFromDiscovered(discovered, classified, { url });
+    return this.extractCurrentFromDiscovered(discovered, classified, root);
   }
 
   extractReport(root: ParentNode = document): ExtractionReport {
