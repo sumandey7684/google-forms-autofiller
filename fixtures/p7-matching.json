@@ -1,0 +1,312 @@
+{
+  "cases": [
+    {
+      "id": "exact-full-name",
+      "type": "text",
+      "text": "Full Name",
+      "status": "matched",
+      "field": "fullName",
+      "method": "exact_canonical"
+    },
+    {
+      "id": "exact-email",
+      "type": "text",
+      "text": "Email Address",
+      "status": "matched",
+      "field": "email",
+      "method": "exact_canonical"
+    },
+    {
+      "id": "exact-phone",
+      "type": "text",
+      "text": "Phone Number",
+      "status": "matched",
+      "field": "phone",
+      "method": "exact_canonical"
+    },
+    {
+      "id": "exact-linkedin",
+      "type": "text",
+      "text": "LinkedIn URL",
+      "status": "matched",
+      "field": "linkedInUrl",
+      "method": "exact_canonical"
+    },
+    {
+      "id": "exact-portfolio",
+      "type": "text",
+      "text": "Portfolio URL",
+      "status": "matched",
+      "field": "portfolioUrl",
+      "method": "exact_canonical"
+    },
+    {
+      "id": "exact-location",
+      "type": "text",
+      "text": "Current Location",
+      "status": "matched",
+      "field": "location",
+      "method": "exact_canonical"
+    },
+    {
+      "id": "exact-notes",
+      "type": "paragraph",
+      "text": "Additional Notes",
+      "status": "matched",
+      "field": "notes",
+      "method": "exact_canonical"
+    },
+    {
+      "id": "alias-full-name",
+      "type": "text",
+      "text": "First & Last Name",
+      "status": "matched",
+      "field": "fullName",
+      "method": "explicit_alias"
+    },
+    {
+      "id": "alias-email-unicode-dash",
+      "type": "text",
+      "text": "Ｅ‐ＭＡＩＬ Address",
+      "status": "matched",
+      "field": "email",
+      "method": "explicit_alias",
+      "normalized": "e mail address"
+    },
+    {
+      "id": "alias-phone",
+      "type": "text",
+      "text": "Mobile Number",
+      "status": "matched",
+      "field": "phone",
+      "method": "explicit_alias"
+    },
+    {
+      "id": "alias-linkedin",
+      "type": "text",
+      "text": "LinkedIn Profile",
+      "status": "matched",
+      "field": "linkedInUrl",
+      "method": "explicit_alias"
+    },
+    {
+      "id": "alias-portfolio",
+      "type": "text",
+      "text": "Personal Website",
+      "status": "matched",
+      "field": "portfolioUrl",
+      "method": "explicit_alias"
+    },
+    {
+      "id": "alias-location-separator",
+      "type": "text",
+      "text": "City & State",
+      "status": "matched",
+      "field": "location",
+      "method": "explicit_alias",
+      "normalized": "city and state"
+    },
+    {
+      "id": "alias-notes",
+      "type": "paragraph",
+      "text": "Anything Else?",
+      "status": "matched",
+      "field": "notes",
+      "method": "explicit_alias"
+    },
+    {
+      "id": "phrase-case-whitespace",
+      "type": "text",
+      "text": "  PLEASE   PROVIDE YOUR full NAME. ",
+      "status": "matched",
+      "field": "fullName",
+      "method": "phrase_token",
+      "normalized": "please provide your full name"
+    },
+    {
+      "id": "phrase-location-slash",
+      "type": "text",
+      "text": "Please enter your current city/state",
+      "status": "matched",
+      "field": "location",
+      "method": "phrase_token"
+    },
+    {
+      "id": "phrase-linkedin-em-dash",
+      "type": "text",
+      "text": "Send your LinkedIn—Profile URL here",
+      "status": "matched",
+      "field": "linkedInUrl",
+      "method": "phrase_token"
+    },
+    {
+      "id": "unicode-fullwidth-portfolio",
+      "type": "text",
+      "text": "ＰＯＲＴＦＯＬＩＯ／ＵＲＬ",
+      "status": "matched",
+      "field": "portfolioUrl",
+      "method": "exact_canonical",
+      "normalized": "portfolio url"
+    },
+    {
+      "id": "ambiguous-contact",
+      "type": "text",
+      "text": "Provide your email address or phone number",
+      "status": "ambiguous",
+      "candidateFields": ["email", "phone"]
+    },
+    {
+      "id": "ambiguous-web-presence",
+      "type": "text",
+      "text": "Share a LinkedIn profile and personal website",
+      "status": "ambiguous",
+      "candidateFields": ["linkedInUrl", "portfolioUrl"]
+    },
+    {
+      "id": "unmatched-domain-question",
+      "type": "paragraph",
+      "text": "Why do you want this role?",
+      "status": "unmatched"
+    },
+    {
+      "id": "weak-name",
+      "type": "text",
+      "text": "Name",
+      "status": "unmatched"
+    },
+    {
+      "id": "weak-email",
+      "type": "text",
+      "text": "Email",
+      "status": "unmatched"
+    },
+    {
+      "id": "weak-phone",
+      "type": "text",
+      "text": "Phone",
+      "status": "unmatched"
+    },
+    {
+      "id": "weak-experience",
+      "type": "paragraph",
+      "text": "Experience",
+      "status": "unmatched"
+    },
+    {
+      "id": "weak-location",
+      "type": "text",
+      "text": "Location",
+      "status": "unmatched"
+    },
+    {
+      "id": "unicode-non-english",
+      "type": "text",
+      "text": "আপনার পুরো নাম",
+      "status": "unmatched",
+      "normalized": "আপনার পুরো নাম"
+    },
+    {
+      "id": "noncontiguous-city-state",
+      "type": "paragraph",
+      "text": "Choose a city, then state your reasons",
+      "status": "unmatched"
+    },
+    {
+      "id": "noncontiguous-contact-email",
+      "type": "paragraph",
+      "text": "Name a contact and describe notification preferences for email",
+      "status": "unmatched"
+    },
+    {
+      "id": "third-party-reference-email",
+      "type": "text",
+      "text": "Reference email address",
+      "status": "unmatched"
+    },
+    {
+      "id": "third-party-emergency-phone",
+      "type": "text",
+      "text": "Emergency contact phone number",
+      "status": "unmatched"
+    },
+    {
+      "id": "third-party-company-name",
+      "type": "text",
+      "text": "Company full name",
+      "status": "unmatched"
+    },
+    {
+      "id": "third-party-contact-person",
+      "type": "text",
+      "text": "Contact person full name",
+      "status": "unmatched"
+    },
+    {
+      "id": "unknown-question",
+      "type": "unknown",
+      "text": "Email Address",
+      "status": "unsupported"
+    },
+    {
+      "id": "provider-unsupported-question",
+      "type": "file_upload",
+      "text": "Portfolio URL",
+      "status": "unsupported"
+    },
+    {
+      "id": "choice-question-not-mapped",
+      "type": "dropdown",
+      "text": "Current Location",
+      "status": "unsupported"
+    },
+    {
+      "id": "invalid-empty-text",
+      "type": "text",
+      "text": "  —  ",
+      "status": "invalid"
+    },
+    {
+      "id": "",
+      "type": "text",
+      "text": "Full Name",
+      "status": "invalid"
+    }
+  ],
+  "form": {
+    "id": "form:p7-adversarial",
+    "title": "P7 adversarial fixture",
+    "url": "https://example.invalid/p7-adversarial",
+    "extractedAt": "2026-09-12T00:00:00.000Z",
+    "sections": [
+      {
+        "id": "section:profile",
+        "title": "Profile",
+        "questions": [
+          {
+            "id": "duplicate-label-a",
+            "type": "text",
+            "text": "Full Name"
+          },
+          {
+            "id": "duplicate-label-b",
+            "type": "text",
+            "text": "Full Name"
+          },
+          {
+            "id": "metadata-leak-check",
+            "type": "text",
+            "text": "Email Address",
+            "metadata": {
+              "answerValue": "P7_SECRET_ANSWER_MUST_NOT_LEAK"
+            }
+          },
+          {
+            "id": "unknown-in-form",
+            "type": "unknown",
+            "text": "Unknown profile widget"
+          }
+        ]
+      }
+    ]
+  }
+}

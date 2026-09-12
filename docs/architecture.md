@@ -10,7 +10,7 @@ Google Form AutoFiller helps users fill Google Forms for job and internship appl
 - a review step before fill
 - **manual** submission by the user
 
-This document describes the codebase after **P6 (section navigation)**.
+This document describes the codebase after **P7 (deterministic profile matching)**.
 
 ## 2. P0 foundation (complete)
 
@@ -50,6 +50,7 @@ Discovery details: [google-forms-discovery.md](./google-forms-discovery.md).
 - **FormAnswer** — questionId, discriminated `AnswerValue`, source, status, optional confidence
 - **FillPlan** / **FillOperation** — DOM-independent fill intent
 - **FillResult** / **FillOperationResult** — success / failed / skipped / unsupported + totals helpers
+- **MatchingReport** / **QuestionMatchResult** — deterministic field-key matches, ambiguity, and unmatched/unsupported states
 - **FormAdapter** — `canHandle` / `extract` / `fill`
 - **AppError** — typed `ErrorCode` + message
 
@@ -58,7 +59,7 @@ Answers are **not** DOM values. Fill plans are **not** Google-specific selectors
 ## 5. Dependency direction
 
 ```
-core/types  (pure domain)
+core/types + core/matching  (pure domain and deterministic matching)
      ↑
 core/validation  (Zod for boundaries + profile schema)
      ↑
@@ -70,6 +71,7 @@ content Google Forms adapter (future) implements FormAdapter
 **Rules**
 
 - `core/` must not import React, `chrome.*`, Google DOM code, AI SDKs, or HTTP clients.
+- `core/matching` must not read profile values, storage, messaging, or FillPlan execution code.
 - Content may depend on core; core must not depend on content.
 - Popup depends on messaging contracts + presentation only.
 
@@ -170,9 +172,24 @@ Flow: DOM discovery → classification → Form / FillPlan → **optional sectio
 
 Google Forms logic lives under `content/google-forms/`.
 
+### P7 — Deterministic profile-to-question matching
+
+`matchFormQuestions(form)` maps supported extracted questions to existing
+`UserProfile` field keys.
+
+- DOM-free and independent of Chrome, storage, messaging, and network APIs
+- Exact canonical → explicit alias → conservative phrase/token rules
+- Preserves equal-strength candidates as `ambiguous`
+- Leaves weak generic labels unmatched
+- Emits no profile values, answer values, or FillPlans
+- Supports `text` and `paragraph` questions only in P7
+
+See [profile-question-matching.md](./profile-question-matching.md).
+
 ## 8. Intentionally NOT implemented yet
 
-- Profile ↔ question matching / FillPlan construction
+- Profile-value selection and FillPlan construction
+- Saved-answer matching
 - AI answer generation
 - Review UI beyond the status popup
 - Authentication / backend / Google Docs
@@ -189,6 +206,7 @@ Google Forms logic lives under `content/google-forms/`.
 | **P4** | ✅ Normalize discovery+classification → core `Form` / `Question` |
 | **P5** | ✅ Fill engine (apply FillPlan to visible DOM) |
 | **P6** | ✅ Safe Next/Back section navigation (never Submit) |
-| **P7+** | Matching / cross-section orchestration / review; optional AI; manual submit |
+| **P7** | ✅ Deterministic profile-field matching (no values or FillPlan) |
+| **P8+** | Value selection / cross-section orchestration / review; optional AI; manual submit |
 
 Each phase should extend adapters/engines without redesigning the P1 core model.
