@@ -13,12 +13,18 @@ import {
 } from './classification';
 import { extractForm } from './extract';
 import { applyFillPlan as applyFillPlanToDom } from './fill';
+import {
+  inspectNavigation,
+  navigateSection,
+  runNavigation,
+} from './navigation';
+import type { NavigationAction, NavigationResult } from '@/core/types/navigation';
 import type { DiscoveredQuestion, DiscoveryReport } from './types';
 import type { ClassifiedQuestion } from '@/core/types/classification-report';
 
 /**
  * Google Forms adapter boundary.
- * P2 discovery → P3 classification → P4 extraction → P5 fill.
+ * P2 discovery → P3 classification → P4 extraction → P5 fill → P6 navigation.
  */
 export class GoogleFormsAdapter implements FormAdapter {
   readonly id = 'google-forms';
@@ -132,6 +138,24 @@ export class GoogleFormsAdapter implements FormAdapter {
   /** Synchronous fill against an optional root (fixtures / tests). */
   fillSync(plan: FillPlan, root: ParentNode = document): FillResult {
     return applyFillPlanToDom(plan, root);
+  }
+
+  /** P6: inspect current section navigation chrome (read-only). */
+  inspectNavigation(root: ParentNode = document) {
+    return inspectNavigation(root);
+  }
+
+  /** P6: navigate next/back or inspect; never submits. */
+  navigate(action: NavigationAction, root: ParentNode = document): NavigationResult {
+    return runNavigation(action, root);
+  }
+
+  navigateNext(root: ParentNode = document): NavigationResult {
+    return navigateSection('next', root);
+  }
+
+  navigateBack(root: ParentNode = document): NavigationResult {
+    return navigateSection('back', root);
   }
 
   private resolveUrl(root: ParentNode): string {

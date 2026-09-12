@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>P6 Navigation Fixture</title>
+  </head>
+  <body>
+    <!-- Single-section form (no Next/Back) -->
+    <div id="single-root">
+      <div role="list" id="single-list">
+        <div role="listitem" id="s-text">
+          <div role="heading">Name</div>
+          <input type="text" aria-label="Name" name="entry.1" />
+        </div>
+      </div>
+      <button type="submit" id="single-submit">Submit</button>
+    </div>
+
+    <!-- Two-section form with Next/Back/Submit -->
+    <div id="multi-root">
+      <div role="list" id="multi-list">
+        <!-- Page 1 content injected/managed by smoke; starter page 1 -->
+        <div role="listitem" id="m1-text">
+          <div role="heading">Section 1 — Name</div>
+          <input type="text" aria-label="Name" name="entry.10" aria-required="true" />
+        </div>
+      </div>
+      <div id="multi-chrome">
+        <button type="button" id="multi-back">Back</button>
+        <button type="button" id="multi-next">Next</button>
+        <button type="submit" id="multi-submit">Submit</button>
+      </div>
+    </div>
+
+    <!-- Final section only Submit -->
+    <div id="final-root">
+      <div role="list">
+        <div role="listitem" id="f-done">
+          <div role="heading">Almost done</div>
+          <input type="text" aria-label="Notes" />
+        </div>
+      </div>
+      <button type="button" id="final-back">Back</button>
+      <button type="submit" id="final-submit">Submit</button>
+    </div>
+
+    <!-- Ambiguous next labels -->
+    <div id="ambiguous-root">
+      <div role="list">
+        <div role="listitem">
+          <div role="heading">Q</div>
+          <input type="text" aria-label="Q" />
+        </div>
+      </div>
+      <button type="button">Next</button>
+      <button type="button">Next page</button>
+    </div>
+
+    <!-- Button containing Submit must never be clicked as navigation -->
+    <div id="submit-trap-root">
+      <div role="list">
+        <div role="listitem">
+          <div role="heading">Trap</div>
+          <input type="text" aria-label="Trap" />
+        </div>
+      </div>
+      <button type="button" id="trap-submit-text">Submit response</button>
+      <button type="button" id="trap-next">Next</button>
+    </div>
+
+    <!-- Required blocking -->
+    <div id="required-root">
+      <div role="list" id="required-list">
+        <div role="listitem" id="r-text">
+          <div role="heading">Required name</div>
+          <input
+            type="text"
+            aria-label="Required name"
+            name="entry.99"
+            aria-required="true"
+            required
+          />
+        </div>
+      </div>
+      <button type="button" id="required-next">Next</button>
+    </div>
+  </body>
+</html>

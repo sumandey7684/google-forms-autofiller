@@ -37,7 +37,7 @@ async function handleMessage(
       const response: ExtensionStatusResponse = {
         version: EXTENSION_VERSION,
         ready: true,
-        scope: 'p5-fill',
+        scope: 'p6-navigation',
       };
       return response;
     }
@@ -56,7 +56,9 @@ async function handleMessage(
     case MessageType.DISCOVER_FORM:
     case MessageType.CLASSIFY_FORM:
     case MessageType.EXTRACT_FORM:
-    case MessageType.FILL_FORM: {
+    case MessageType.FILL_FORM:
+    case MessageType.INSPECT_NAVIGATION:
+    case MessageType.NAVIGATE_FORM: {
       const response: ErrorResponse = {
         error: createAppError(
           ErrorCode.INVALID_REQUEST,
@@ -106,5 +108,5 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 });
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.info('[Google Form AutoFiller] Service worker installed (P5 fill).');
+  console.info('[Google Form AutoFiller] Service worker installed (P6 navigation).');
 });

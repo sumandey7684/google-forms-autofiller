@@ -13,7 +13,8 @@
     "p2-discovery-smoke": "tsx --tsconfig tsconfig.app.json scripts/p2-discovery-smoke.ts",
     "p3-classification-smoke": "tsx --tsconfig tsconfig.app.json scripts/p3-classification-smoke.ts",
     "p4-extraction-smoke": "tsx --tsconfig tsconfig.app.json scripts/p4-extraction-smoke.ts",
-    "p5-fill-smoke": "tsx --tsconfig tsconfig.app.json scripts/p5-fill-smoke.ts"
+    "p5-fill-smoke": "tsx --tsconfig tsconfig.app.json scripts/p5-fill-smoke.ts",
+    "p6-navigation-smoke": "tsx --tsconfig tsconfig.app.json scripts/p6-navigation-smoke.ts"
   },
   "dependencies": {
     "react": "^19.0.0",

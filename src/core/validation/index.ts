@@ -18,6 +18,8 @@ export {
   type ClassifyFormResponse,
   type ExtractFormResponse,
   type FillFormResponse,
+  type InspectNavigationResponse,
+  type NavigateFormResponse,
   type ErrorResponse,
   type ExtensionResponse,
 } from './messages';

@@ -55,6 +55,21 @@ export {
   applyFillPlan,
   logFillSummary,
 } from './fill';
+export {
+  inspectNavigation,
+  navigateSection,
+  runNavigation,
+  logNavigationSummary,
+} from './navigation';
+export type {
+  NavigationAction,
+  NavigationStateCode,
+  NavigationOutcomeStatus,
+  NavigationSectionSnapshot,
+  NavigationControlsSnapshot,
+  NavigationInspection,
+  NavigationResult,
+} from '@/core/types/navigation';
 export type {
   ExtractionWarningCode,
   ExtractionWarning,

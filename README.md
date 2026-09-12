@@ -12,11 +12,12 @@ Chrome extension for helping users fill Google Forms (job and internship applica
 | Deterministic question classification | Complete (P3) |
 | Form extraction / normalization to core `Form` | Complete (P4) |
 | Fill engine (apply FillPlan to visible DOM) | Complete (P5) |
+| Safe multi-section navigation (Next/Back; never Submit) | Complete (P6) |
 | Profile matching | Not implemented |
 | AI answers | Not implemented |
 | Automatic submission | Intentionally not implemented (submit stays manual) |
 
-See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), [docs/google-forms-classification.md](docs/google-forms-classification.md), [docs/google-forms-extraction.md](docs/google-forms-extraction.md), and [docs/google-forms-fill.md](docs/google-forms-fill.md).
+See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), [docs/google-forms-classification.md](docs/google-forms-classification.md), [docs/google-forms-extraction.md](docs/google-forms-extraction.md), [docs/google-forms-fill.md](docs/google-forms-fill.md), and [docs/google-forms-navigation.md](docs/google-forms-navigation.md).
 
 ## Architecture
 
@@ -38,7 +39,7 @@ src/
 
 **Build:** Vite + `@crxjs/vite-plugin` bundles the extension into `dist/`.
 
-## Current scope (P0 + P1 + P2 + P3 + P4 + P5)
+## Current scope (P0 + P1 + P2 + P3 + P4 + P5 + P6)
 
 Implemented:
 
@@ -47,24 +48,26 @@ Implemented:
 - Background service worker
 - Content script registration on Google Forms URLs
 - Minimal popup UI that pings the service worker
-- Typed messaging contracts (`PING`, profile, status, `DETECT_FORM`, `DISCOVER_FORM`, `CLASSIFY_FORM`, `GET_FORM`, `EXTRACT_FORM`, `FILL_FORM`)
+- Typed messaging contracts (`PING`, profile, status, `DETECT_FORM`, `DISCOVER_FORM`, `CLASSIFY_FORM`, `GET_FORM`, `EXTRACT_FORM`, `FILL_FORM`, `INSPECT_NAVIGATION`, `NAVIGATE_FORM`)
 - Profile schema + `chrome.storage.local` helpers
-- Domain model: Form / Section / Question / FormAnswer / FillPlan / FillResult / FormAdapter / AppError
+- Domain model: Form / Section / Question / FormAnswer / FillPlan / FillResult / FormAdapter / AppError / Navigation*
 - Google Forms discovery: candidate question containers + control evidence (read-only)
 - Deterministic classification of discovered questions (`ClassifiedQuestion` / `ClassificationReport`)
 - Normalized Form extraction from discovery + classification (`ExtractionReport`)
 - Fill engine: apply authoritative `FillPlan` to the currently visible DOM (`FillResult`)
+- Safe section navigation: inspect / Next / Back with rediscovery (never Submit)
 
 ## Not implemented yet
 
 - Profile ↔ question matching / answer selection (who builds the FillPlan)
+- End-to-end multi-section fill orchestration
+- Conditional section branching
 - AI-generated answers
 - Review UI before fill
 - Authentication / accounts
 - Backend APIs
 - Google Docs support
 - Automatic form submission (out of scope permanently — submit stays manual)
-- Multi-section navigation
 
 ## Prerequisites
 

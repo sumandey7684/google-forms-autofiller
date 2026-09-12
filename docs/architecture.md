@@ -10,7 +10,7 @@ Google Form AutoFiller helps users fill Google Forms for job and internship appl
 - a review step before fill
 - **manual** submission by the user
 
-This document describes the codebase after **P5 (Fill Engine foundation)**.
+This document describes the codebase after **P6 (section navigation)**.
 
 ## 2. P0 foundation (complete)
 
@@ -88,6 +88,8 @@ Central contract: `MessageType` + Zod `ExtensionMessageSchema` in `core/validati
 | `GET_FORM` | content | P4 normalized `Form` |
 | `EXTRACT_FORM` | content | P4 `{ form, report }` |
 | `FILL_FORM` | content | P5 apply `FillPlan` → `FillResult` |
+| `INSPECT_NAVIGATION` | content | P6 navigation inspect (read-only) |
+| `NAVIGATE_FORM` | content | P6 `{ action: 'next' \| 'back' }` — never Submit |
 
 Runtime validation: `isExtensionMessage` / `AppErrorSchema` at extension boundaries. Errors use `{ error: AppError }`, not bare strings.
 
@@ -150,9 +152,21 @@ See [google-forms-extraction.md](./google-forms-extraction.md).
 
 See [google-forms-fill.md](./google-forms-fill.md).
 
-`GoogleFormsAdapter` exposes discovery, classification, extraction, and fill helpers.
+### P6 — Section navigation
 
-Flow: DOM discovery → classification → normalized Form → **FillPlan application**.
+`inspectNavigation` / `navigateSection` detect Next/Back/Submit chrome and move between visible pages.
+
+- Reuses P2 discovery + P3 classification after every successful move
+- Distinguishes Submit and **never clicks it**
+- Returns structured blocked/unsupported states (ambiguity, required blocking, submit-only final)
+- Does **not** auto-advance during discovery or fill across all sections
+- Linear Next/Back only — branching unsupported
+
+See [google-forms-navigation.md](./google-forms-navigation.md).
+
+`GoogleFormsAdapter` exposes discovery, classification, extraction, fill, and navigation helpers.
+
+Flow: DOM discovery → classification → Form / FillPlan → **optional section navigation**.
 
 Google Forms logic lives under `content/google-forms/`.
 
@@ -163,7 +177,8 @@ Google Forms logic lives under `content/google-forms/`.
 - Review UI beyond the status popup
 - Authentication / backend / Google Docs
 - Automatic submission (permanently out of scope)
-- Multi-section navigation / Next-Back traversal
+- End-to-end multi-section fill orchestration
+- Conditional section branching graphs
 
 ## 9. Planned next evolution
 
@@ -173,6 +188,7 @@ Google Forms logic lives under `content/google-forms/`.
 | **P3** | ✅ Deterministic question classification |
 | **P4** | ✅ Normalize discovery+classification → core `Form` / `Question` |
 | **P5** | ✅ Fill engine (apply FillPlan to visible DOM) |
-| **P6+** | Matching / review / optional AI; manual submit |
+| **P6** | ✅ Safe Next/Back section navigation (never Submit) |
+| **P7+** | Matching / cross-section orchestration / review; optional AI; manual submit |
 
 Each phase should extend adapters/engines without redesigning the P1 core model.

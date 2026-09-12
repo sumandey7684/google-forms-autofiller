@@ -20,6 +20,8 @@ export {
   type ClassifyFormResponse,
   type ExtractFormResponse,
   type FillFormResponse,
+  type InspectNavigationResponse,
+  type NavigateFormResponse,
   type ErrorResponse,
 } from '@/core/validation/messages';
 

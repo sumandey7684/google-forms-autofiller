@@ -70,3 +70,15 @@ export type {
   ExtractionReport,
   ExtractionResult,
 } from './extraction-report';
+
+export type {
+  NavigationAction,
+  NavigationStateCode,
+  NavigationOutcomeStatus,
+  NavigationSectionSnapshot,
+  NavigationControlsSnapshot,
+  NavigationInspection,
+  NavigationResult,
+} from './navigation';
+
+export { createInspectResult } from './navigation';

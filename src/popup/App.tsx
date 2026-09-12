@@ -46,7 +46,7 @@ export function App() {
     <main className="popup">
       <header className="popup__header">
         <h1 className="popup__title">Google Form AutoFiller</h1>
-        <p className="popup__subtitle">P5 fill engine</p>
+        <p className="popup__subtitle">P6 navigation</p>
       </header>
 
       <section className="popup__section" aria-live="polite">
@@ -73,8 +73,9 @@ export function App() {
       </section>
 
       <p className="popup__note">
-        Discovery, classification, extraction, and FillPlan application are in place.
-        Profile matching, AI answers, navigation, and auto-submit are not implemented.
+        Discovery through fill and section navigation inspection are in place.
+        Profile matching, AI, review UI, and auto-submit are not implemented. Submit
+        is never clicked by navigation.
       </p>
     </main>
   );

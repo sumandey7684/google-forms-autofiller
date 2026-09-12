@@ -6,6 +6,7 @@ import type { DiscoveryReport } from '@/core/types/discovery-report';
 import type { ClassificationReport } from '@/core/types/classification-report';
 import type { ExtractionResult } from '@/core/types/extraction-report';
 import type { FillResult } from '@/core/types/fill';
+import type { NavigationResult } from '@/core/types/navigation';
 import type { AppError } from '@/core/types/errors';
 import { ErrorCode } from '@/core/types/errors';
 
@@ -26,6 +27,8 @@ export const MessageType = {
   CLASSIFY_FORM: 'CLASSIFY_FORM',
   EXTRACT_FORM: 'EXTRACT_FORM',
   FILL_FORM: 'FILL_FORM',
+  INSPECT_NAVIGATION: 'INSPECT_NAVIGATION',
+  NAVIGATE_FORM: 'NAVIGATE_FORM',
 } as const;
 
 export type MessageTypeName = (typeof MessageType)[keyof typeof MessageType];
@@ -91,6 +94,17 @@ export const FillFormMessageSchema = z.object({
   payload: FillPlanSchema,
 });
 
+export const InspectNavigationMessageSchema = z.object({
+  type: z.literal(MessageType.INSPECT_NAVIGATION),
+});
+
+export const NavigateFormMessageSchema = z.object({
+  type: z.literal(MessageType.NAVIGATE_FORM),
+  payload: z.object({
+    action: z.enum(['next', 'back']),
+  }),
+});
+
 export const ExtensionMessageSchema = z.discriminatedUnion('type', [
   PingMessageSchema,
   GetExtensionStatusMessageSchema,
@@ -102,6 +116,8 @@ export const ExtensionMessageSchema = z.discriminatedUnion('type', [
   ClassifyFormMessageSchema,
   ExtractFormMessageSchema,
   FillFormMessageSchema,
+  InspectNavigationMessageSchema,
+  NavigateFormMessageSchema,
 ]);
 
 export type ExtensionMessage = z.infer<typeof ExtensionMessageSchema>;
@@ -112,6 +128,7 @@ const errorCodeValues = [
   ErrorCode.EXTRACTION_FAILED,
   ErrorCode.UNSUPPORTED_QUESTION,
   ErrorCode.FILL_FAILED,
+  ErrorCode.NAVIGATION_FAILED,
   ErrorCode.INVALID_REQUEST,
 ] as const;
 
@@ -144,7 +161,7 @@ export interface PongResponse {
 export interface ExtensionStatusResponse {
   version: string;
   ready: boolean;
-  scope: 'p5-fill';
+  scope: 'p6-navigation';
 }
 
 export interface ProfileResponse {
@@ -179,6 +196,14 @@ export interface FillFormResponse {
   fill: FillResult;
 }
 
+export interface InspectNavigationResponse {
+  navigation: NavigationResult;
+}
+
+export interface NavigateFormResponse {
+  navigation: NavigationResult;
+}
+
 export interface ErrorResponse {
   error: AppError;
 }
@@ -194,6 +219,8 @@ export type ExtensionResponse =
   | ClassifyFormResponse
   | ExtractFormResponse
   | FillFormResponse
+  | InspectNavigationResponse
+  | NavigateFormResponse
   | ErrorResponse;
 
 export function isErrorResponse(value: unknown): value is ErrorResponse {

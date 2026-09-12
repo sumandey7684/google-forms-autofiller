@@ -19,14 +19,15 @@ import {
   type GetFormResponse,
   type ExtractFormResponse,
   type FillFormResponse,
+  type InspectNavigationResponse,
+  type NavigateFormResponse,
   type ErrorResponse,
 } from '@/utils/messaging';
 import { ErrorCode, createAppError, isAppError } from '@/core/types/errors';
 
 /**
  * Content script entry.
- * P2 discovery → P3 classification → P4 extraction → P5 fill.
- * No navigation / submission / profile matching.
+ * P2–P5 pipeline + P6 section navigation (never submits).
  */
 
 const adapter = createGoogleFormsAdapter();
@@ -141,6 +142,46 @@ function handleMessage(
           sendResponse(response);
         });
       return true;
+    }
+    case MessageType.INSPECT_NAVIGATION: {
+      try {
+        const response: InspectNavigationResponse = {
+          navigation: adapter.navigate('inspect'),
+        };
+        sendResponse(response);
+      } catch (error: unknown) {
+        const response: ErrorResponse = {
+          error: isAppError(error)
+            ? error
+            : createAppError(
+                ErrorCode.NAVIGATION_FAILED,
+                error instanceof Error
+                  ? error.message
+                  : 'Navigation inspect failed',
+              ),
+        };
+        sendResponse(response);
+      }
+      return false;
+    }
+    case MessageType.NAVIGATE_FORM: {
+      try {
+        const response: NavigateFormResponse = {
+          navigation: adapter.navigate(typed.payload.action),
+        };
+        sendResponse(response);
+      } catch (error: unknown) {
+        const response: ErrorResponse = {
+          error: isAppError(error)
+            ? error
+            : createAppError(
+                ErrorCode.NAVIGATION_FAILED,
+                error instanceof Error ? error.message : 'Navigation failed',
+              ),
+        };
+        sendResponse(response);
+      }
+      return false;
     }
     default: {
       const response: ErrorResponse = {
