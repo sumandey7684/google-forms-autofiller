@@ -38,7 +38,8 @@ export type AnswerValidationErrorCode =
   | 'profile_match_ambiguous'
   | 'profile_match_invalid'
   | 'profile_value_missing'
-  | 'match_result_missing';
+  | 'match_result_missing'
+  | 'ai_provider_error';
 
 export interface AnswerValidationError {
   code: AnswerValidationErrorCode;

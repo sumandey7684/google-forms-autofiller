@@ -28,7 +28,9 @@ For each question, P8 checks:
 
 An invalid or ambiguous saved answer at a higher precedence is reported and
 stops resolution. P8 never silently replaces it with a lower-precedence
-profile value.
+profile value. AI fallback is intentionally excluded from P8 and handled only
+by the separate P9 orchestration layer after local resolution returns
+`missing`.
 
 Exact question ids are current-discovery identities. Normalized-text fallback
 exists because those ids are not permanent across rediscovery. Duplicate

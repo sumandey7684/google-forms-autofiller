@@ -1,0 +1,86 @@
+{
+  "profile": {
+    "fullName": "Profile Test User",
+    "email": "profile@example.com",
+    "location": "Test City"
+  },
+  "form": {
+    "id": "form:p9-ai",
+    "title": "P9 AI fixture",
+    "url": "https://example.invalid/p9-ai",
+    "extractedAt": "2026-09-13T00:00:00.000Z",
+    "sections": [
+      {
+        "id": "section:1",
+        "title": "Answers",
+        "questions": [
+          {
+            "id": "q-saved-exact",
+            "type": "text",
+            "text": "Full Name"
+          },
+          {
+            "id": "q-profile",
+            "type": "text",
+            "text": "Email Address"
+          },
+          {
+            "id": "q-ai-text",
+            "type": "text",
+            "text": "Why do you want this role?",
+            "description": "One short sentence."
+          },
+          {
+            "id": "q-ai-choice",
+            "type": "multiple_choice",
+            "text": "Preferred Role",
+            "options": [
+              { "id": "opt:engineer", "label": "Engineer" },
+              { "id": "opt:designer", "label": "Designer" }
+            ]
+          },
+          {
+            "id": "q-ai-invalid",
+            "type": "text",
+            "text": "Anything else about yourself?"
+          },
+          {
+            "id": "q-ai-error",
+            "type": "paragraph",
+            "text": "Describe a recent project"
+          },
+          {
+            "id": "q-unknown",
+            "type": "unknown",
+            "text": "Unknown widget"
+          },
+          {
+            "id": "q-ambiguous-saved",
+            "type": "text",
+            "text": "Current Location"
+          }
+        ]
+      }
+    ]
+  },
+  "savedAnswerInputs": [
+    {
+      "questionId": "q-saved-exact",
+      "questionText": "Full Name",
+      "questionType": "text",
+      "value": { "kind": "single", "value": "Saved Exact User" }
+    },
+    {
+      "questionText": "Current Location",
+      "questionType": "text",
+      "context": "application-a",
+      "value": { "kind": "single", "value": "City A" }
+    },
+    {
+      "questionText": "Current Location",
+      "questionType": "text",
+      "context": "application-b",
+      "value": { "kind": "single", "value": "City B" }
+    }
+  ]
+}

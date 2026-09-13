@@ -16,7 +16,8 @@
     "p5-fill-smoke": "tsx --tsconfig tsconfig.app.json scripts/p5-fill-smoke.ts",
     "p6-navigation-smoke": "tsx --tsconfig tsconfig.app.json scripts/p6-navigation-smoke.ts",
     "p7-matching-smoke": "tsx --tsconfig tsconfig.app.json scripts/p7-matching-smoke.ts",
-    "p8-saved-answers-smoke": "tsx --tsconfig tsconfig.app.json scripts/p8-saved-answers-smoke.ts"
+    "p8-saved-answers-smoke": "tsx --tsconfig tsconfig.app.json scripts/p8-saved-answers-smoke.ts",
+    "p9-ai-provider-smoke": "tsx --tsconfig tsconfig.app.json scripts/p9-ai-provider-smoke.ts"
   },
   "dependencies": {
     "react": "^19.0.0",
