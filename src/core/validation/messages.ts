@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { UserProfileSchema, type UserProfile } from './profile';
+import { AnswerValueSchema } from './answer';
 import type { Form } from '@/core/types/form';
 import type { FormDetectionResult } from '@/core/types/detection';
 import type { DiscoveryReport } from '@/core/types/discovery-report';
@@ -69,14 +70,6 @@ export const ClassifyFormMessageSchema = z.object({
 export const ExtractFormMessageSchema = z.object({
   type: z.literal(MessageType.EXTRACT_FORM),
 });
-
-const AnswerValueSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('single'), value: z.string() }),
-  z.object({
-    kind: z.literal('multi'),
-    values: z.array(z.string()),
-  }),
-]);
 
 const FillOperationSchema = z.object({
   questionId: z.string().min(1),

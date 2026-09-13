@@ -1,0 +1,217 @@
+{
+  "profile": {
+    "fullName": "Profile Test User",
+    "email": "profile@example.com",
+    "phone": "+1 555 0100",
+    "linkedInUrl": "https://www.linkedin.com/in/test-user",
+    "portfolioUrl": "https://example.com/portfolio",
+    "location": "Test City",
+    "notes": "Profile notes"
+  },
+  "form": {
+    "id": "form:p8-adversarial",
+    "title": "P8 adversarial form",
+    "url": "https://example.invalid/p8-adversarial",
+    "extractedAt": "2026-09-12T00:00:00.000Z",
+    "sections": [
+      {
+        "id": "section:1",
+        "title": "Answers",
+        "questions": [
+          {
+            "id": "q-full-name",
+            "type": "text",
+            "text": "Full Name"
+          },
+          {
+            "id": "q-email",
+            "type": "text",
+            "text": "Email Address"
+          },
+          {
+            "id": "q-phone",
+            "type": "text",
+            "text": "Phone Number"
+          },
+          {
+            "id": "q-linkedin",
+            "type": "text",
+            "text": "LinkedIn URL"
+          },
+          {
+            "id": "q-portfolio",
+            "type": "text",
+            "text": "Portfolio URL"
+          },
+          {
+            "id": "q-location",
+            "type": "text",
+            "text": "Current Location"
+          },
+          {
+            "id": "q-notes",
+            "type": "paragraph",
+            "text": "Additional Notes"
+          },
+          {
+            "id": "q-role",
+            "type": "multiple_choice",
+            "text": "Preferred Role",
+            "options": [
+              {
+                "id": "opt:role:engineer",
+                "label": "Engineer"
+              },
+              {
+                "id": "opt:role:designer",
+                "label": "Designer"
+              }
+            ]
+          },
+          {
+            "id": "q-skills",
+            "type": "checkbox",
+            "text": "Skills",
+            "options": [
+              {
+                "id": "opt:skills:ts",
+                "label": "TypeScript"
+              },
+              {
+                "id": "opt:skills:rust",
+                "label": "Rust"
+              }
+            ]
+          },
+          {
+            "id": "q-scale",
+            "type": "linear_scale",
+            "text": "Rating",
+            "min": 1,
+            "max": 5
+          },
+          {
+            "id": "q-date",
+            "type": "date",
+            "text": "Available date"
+          },
+          {
+            "id": "q-time",
+            "type": "time",
+            "text": "Available time"
+          },
+          {
+            "id": "q-unknown",
+            "type": "unknown",
+            "text": "Unknown widget"
+          }
+        ]
+      }
+    ]
+  },
+  "savedAnswerInputs": [
+    {
+      "questionId": "q-email",
+      "questionText": "Email Address",
+      "questionType": "text",
+      "value": {
+        "kind": "single",
+        "value": "saved@example.com"
+      },
+      "label": "Explicit email"
+    },
+    {
+      "questionText": "Preferred Role",
+      "questionType": "multiple_choice",
+      "value": {
+        "kind": "single",
+        "value": "Engineer"
+      }
+    },
+    {
+      "questionId": "q-skills",
+      "questionText": "Skills",
+      "questionType": "checkbox",
+      "value": {
+        "kind": "multi",
+        "values": [
+          "TypeScript",
+          "Rust"
+        ]
+      }
+    },
+    {
+      "questionId": "q-scale",
+      "questionText": "Rating",
+      "questionType": "linear_scale",
+      "value": {
+        "kind": "single",
+        "value": "5"
+      }
+    },
+    {
+      "questionId": "q-date",
+      "questionText": "Available date",
+      "questionType": "date",
+      "value": {
+        "kind": "single",
+        "value": "2028-02-29"
+      }
+    },
+    {
+      "questionId": "q-time",
+      "questionText": "Available time",
+      "questionType": "time",
+      "value": {
+        "kind": "single",
+        "value": "09:30"
+      }
+    },
+    {
+      "questionId": "q-unknown",
+      "questionText": "Unknown widget",
+      "questionType": "unknown",
+      "value": {
+        "kind": "single",
+        "value": "Must remain unsupported"
+      }
+    }
+  ],
+  "duplicateForm": {
+    "id": "form:p8-duplicate-labels",
+    "title": "Duplicate labels",
+    "url": "https://example.invalid/p8-duplicates",
+    "extractedAt": "2026-09-12T00:00:00.000Z",
+    "sections": [
+      {
+        "id": "section:1",
+        "title": "Duplicates",
+        "questions": [
+          {
+            "id": "q-office-a",
+            "type": "text",
+            "text": "Preferred office"
+          },
+          {
+            "id": "q-office-b",
+            "type": "text",
+            "text": "Preferred office"
+          }
+        ]
+      }
+    ]
+  },
+  "duplicateFallbackInput": {
+    "questionText": "Preferred office",
+    "questionType": "text",
+    "value": {
+      "kind": "single",
+      "value": "Remote"
+    }
+  },
+  "unsupportedQuestion": {
+    "id": "q-file",
+    "type": "file_upload",
+    "text": "Resume upload"
+  }
+}

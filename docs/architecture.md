@@ -10,7 +10,7 @@ Google Form AutoFiller helps users fill Google Forms for job and internship appl
 - a review step before fill
 - **manual** submission by the user
 
-This document describes the codebase after **P7 (deterministic profile matching)**.
+This document describes the codebase after **P8 (saved answers and answer-value resolution)**.
 
 ## 2. P0 foundation (complete)
 
@@ -51,6 +51,7 @@ Discovery details: [google-forms-discovery.md](./google-forms-discovery.md).
 - **FillPlan** / **FillOperation** — DOM-independent fill intent
 - **FillResult** / **FillOperationResult** — success / failed / skipped / unsupported + totals helpers
 - **MatchingReport** / **QuestionMatchResult** — deterministic field-key matches, ambiguity, and unmatched/unsupported states
+- **SavedAnswer** / **AnswerResolutionReport** — local answer sources, validated candidates, ambiguity, and missing/blocked states
 - **FormAdapter** — `canHandle` / `extract` / `fill`
 - **AppError** — typed `ErrorCode` + message
 
@@ -59,7 +60,7 @@ Answers are **not** DOM values. Fill plans are **not** Google-specific selectors
 ## 5. Dependency direction
 
 ```
-core/types + core/matching  (pure domain and deterministic matching)
+core/types + core/matching + core/resolution  (pure domain logic)
      ↑
 core/validation  (Zod for boundaries + profile schema)
      ↑
@@ -72,6 +73,7 @@ content Google Forms adapter (future) implements FormAdapter
 
 - `core/` must not import React, `chrome.*`, Google DOM code, AI SDKs, or HTTP clients.
 - `core/matching` must not read profile values, storage, messaging, or FillPlan execution code.
+- `core/resolution` receives values as arguments; it must not access storage, messaging, DOM, network, AI, or FillPlan execution.
 - Content may depend on core; core must not depend on content.
 - Popup depends on messaging contracts + presentation only.
 
@@ -186,10 +188,24 @@ Google Forms logic lives under `content/google-forms/`.
 
 See [profile-question-matching.md](./profile-question-matching.md).
 
+### P8 — Saved answers and answer-value resolution
+
+`resolveAnswers(input)` combines P7 results, existing profile values, and
+saved-answer records into validated `AnswerValue` candidates.
+
+- Pure and DOM-free; storage is injected data rather than read by the resolver
+- Exact saved question → unique normalized-text saved answer → P7 profile field
+- Invalid or ambiguous higher-precedence values do not fall through silently
+- Validates all P4 question types and canonicalizes unique choice labels to ids
+- Thin, Zod-validated `chrome.storage.local` adapter for saved records
+- Does **not** construct or execute FillPlans, fill, navigate, submit, or use AI
+
+See [answer-value-resolution.md](./answer-value-resolution.md).
+
 ## 8. Intentionally NOT implemented yet
 
-- Profile-value selection and FillPlan construction
-- Saved-answer matching
+- FillPlan construction from resolved candidates
+- Saved-answer editing or review UI
 - AI answer generation
 - Review UI beyond the status popup
 - Authentication / backend / Google Docs
@@ -207,6 +223,7 @@ See [profile-question-matching.md](./profile-question-matching.md).
 | **P5** | ✅ Fill engine (apply FillPlan to visible DOM) |
 | **P6** | ✅ Safe Next/Back section navigation (never Submit) |
 | **P7** | ✅ Deterministic profile-field matching (no values or FillPlan) |
-| **P8+** | Value selection / cross-section orchestration / review; optional AI; manual submit |
+| **P8** | ✅ Local saved answers + deterministic answer-value resolution |
+| **P9+** | FillPlan construction / cross-section orchestration / review; optional AI; manual submit |
 
 Each phase should extend adapters/engines without redesigning the P1 core model.

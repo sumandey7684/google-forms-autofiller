@@ -14,10 +14,11 @@ Chrome extension for helping users fill Google Forms (job and internship applica
 | Fill engine (apply FillPlan to visible DOM) | Complete (P5) |
 | Safe multi-section navigation (Next/Back; never Submit) | Complete (P6) |
 | Deterministic profile-to-question matching | Complete (P7) |
+| Local saved answers and deterministic answer-value resolution | Complete (P8) |
 | AI answers | Not implemented |
 | Automatic submission | Intentionally not implemented (submit stays manual) |
 
-See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), [docs/google-forms-classification.md](docs/google-forms-classification.md), [docs/google-forms-extraction.md](docs/google-forms-extraction.md), [docs/google-forms-fill.md](docs/google-forms-fill.md), [docs/google-forms-navigation.md](docs/google-forms-navigation.md), and [docs/profile-question-matching.md](docs/profile-question-matching.md).
+See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), [docs/google-forms-classification.md](docs/google-forms-classification.md), [docs/google-forms-extraction.md](docs/google-forms-extraction.md), [docs/google-forms-fill.md](docs/google-forms-fill.md), [docs/google-forms-navigation.md](docs/google-forms-navigation.md), [docs/profile-question-matching.md](docs/profile-question-matching.md), and [docs/answer-value-resolution.md](docs/answer-value-resolution.md).
 
 ## Architecture
 
@@ -29,6 +30,7 @@ src/
 ├── core/
 │   ├── types/           # Shared domain types (forms, answers, plans)
 │   ├── matching/        # Deterministic, DOM-free profile-field matching
+│   ├── resolution/      # Deterministic, DOM-free answer-value resolution
 │   ├── parser/          # Reserved for form parsing (empty in V1)
 │   ├── engine/          # Reserved for future fill planning
 │   └── validation/      # Zod schemas (e.g. user profile)
@@ -40,7 +42,7 @@ src/
 
 **Build:** Vite + `@crxjs/vite-plugin` bundles the extension into `dist/`.
 
-## Current scope (P0 + P1 + P2 + P3 + P4 + P5 + P6 + P7)
+## Current scope (P0 + P1 + P2 + P3 + P4 + P5 + P6 + P7 + P8)
 
 Implemented:
 
@@ -58,11 +60,12 @@ Implemented:
 - Fill engine: apply authoritative `FillPlan` to the currently visible DOM (`FillResult`)
 - Safe section navigation: inspect / Next / Back with rediscovery (never Submit)
 - Deterministic matching of supported extracted questions to existing profile field keys
+- Local saved-answer persistence plus deterministic, validated answer candidates
 
 ## Not implemented yet
 
-- Profile-value selection and FillPlan construction
-- Saved-answer matching
+- FillPlan construction from resolved candidates
+- Saved-answer editing or review UI
 - End-to-end multi-section fill orchestration
 - Conditional section branching
 - AI-generated answers
@@ -127,6 +130,7 @@ npm run clean
 | `npm run preview` | Preview the Vite build locally |
 | `npm run clean` | Remove `dist/` |
 | `pnpm run p7-matching-smoke` | Run deterministic P7 matching smoke/audit cases |
+| `pnpm run p8-saved-answers-smoke` | Run P8 resolution, validation, and persistence smoke/audit cases |
 
 ## License
 
