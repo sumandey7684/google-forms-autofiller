@@ -48,6 +48,7 @@ validated against the answer proposal contract (`proposed` / `unsupported` /
 
 ## Status
 
-P12A delivers the backend/provider boundary and configuration. Popup still
-defaults to `MockAiAnswerProvider`; wiring the live HTTP provider into the
-review workflow is a follow-up slice.
+P12A delivers the backend/provider boundary and configuration.
+P12B wires Mock vs Local Gemini selection into the popup workflow.
+
+See [ai-provider-selection.md](./ai-provider-selection.md).

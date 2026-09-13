@@ -37,7 +37,7 @@ async function handleMessage(
       const response: ExtensionStatusResponse = {
         version: EXTENSION_VERSION,
         ready: true,
-        scope: 'p11-autofill-workflow',
+        scope: 'p12b-ai-provider-selection',
       };
       return response;
     }
@@ -109,6 +109,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 chrome.runtime.onInstalled.addListener(() => {
   console.info(
-    '[Google Form AutoFiller] Service worker installed (P11 autofill workflow).',
+    '[Google Form AutoFiller] Service worker installed (P12B AI provider selection).',
   );
 });

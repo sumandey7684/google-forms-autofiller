@@ -2,7 +2,10 @@ import type { Form } from '@/core/types/form';
 import type { FillResult } from '@/core/types/fill';
 import { getProfile, type UserProfile } from '@/storage/profile';
 import { getSavedAnswers } from '@/storage/saved-answers';
-import { MockAiAnswerProvider } from '@/core/ai/mock-provider';
+import {
+  getAiProviderPreference,
+  type AiProviderKind,
+} from '@/storage/ai-provider-preference';
 import type { ProfileValues } from '@/core/resolution/types';
 import {
   prepareAutofillReview,
@@ -20,6 +23,11 @@ import {
   describeActiveTabProblem,
   type ActiveTabProblem,
 } from './active-tab';
+import {
+  resolveWorkflowAiProvider,
+  type ProviderRuntimeStatus,
+  type ResolvedAiProvider,
+} from './provider';
 
 const PROFILE_FIELDS = [
   'fullName',
@@ -64,6 +72,10 @@ export interface WorkflowState {
   items: AutofillReviewItem[];
   fillResult: FillResult | null;
   planRejection: BuildFillPlanResult | null;
+  providerKind: AiProviderKind | null;
+  providerStatus: ProviderRuntimeStatus | null;
+  providerStatusLabel: string | null;
+  providerId: string | null;
 }
 
 export function createInitialWorkflowState(): WorkflowState {
@@ -76,14 +88,38 @@ export function createInitialWorkflowState(): WorkflowState {
     items: [],
     fillResult: null,
     planRejection: null,
+    providerKind: null,
+    providerStatus: null,
+    providerStatusLabel: null,
+    providerId: null,
   };
+}
+
+function providerMessage(resolved: ResolvedAiProvider): string {
+  if (resolved.status === 'mock_active') {
+    return 'Mock provider active.';
+  }
+  if (resolved.status === 'gemini_configured') {
+    return 'Gemini backend configured.';
+  }
+  return 'Gemini backend unavailable — AI fallback may return provider errors until the local backend is running.';
+}
+
+export interface RunDetectAndResolveOptions {
+  /** Override stored preference (tests / explicit popup selection). */
+  providerKind?: AiProviderKind;
+  fetchImpl?: typeof fetch;
+  geminiHealthy?: boolean;
+  backendUrl?: string;
 }
 
 /**
  * Detect active form → load profile/saved answers → P7–P10 prepare.
- * Uses the mock AI provider only (no live networking).
+ * Uses mock by default; Gemini via HttpAiAnswerProvider when selected.
  */
-export async function runDetectAndResolve(): Promise<
+export async function runDetectAndResolve(
+  options: RunDetectAndResolveOptions = {},
+): Promise<
   | { ok: true; state: WorkflowState }
   | { ok: false; state: WorkflowState; problem?: ActiveTabProblem }
 > {
@@ -100,27 +136,42 @@ export async function runDetectAndResolve(): Promise<
     };
   }
 
+  const preferredKind =
+    options.providerKind ?? (await getAiProviderPreference());
+  const resolved = await resolveWorkflowAiProvider({
+    kind: preferredKind,
+    ...(options.fetchImpl !== undefined
+      ? { fetchImpl: options.fetchImpl }
+      : {}),
+    ...(options.geminiHealthy !== undefined
+      ? { geminiHealthy: options.geminiHealthy }
+      : {}),
+    ...(options.backendUrl !== undefined
+      ? { backendUrl: options.backendUrl }
+      : {}),
+  });
+
   const profile = toProfileValues(await getProfile());
   const savedAnswers = await getSavedAnswers();
-  const provider = new MockAiAnswerProvider();
 
+  // includeProfileContext stays false so prepare sends only P9 minimal context
+  // for missing questions — no whole-form dump and no unnecessary profile fields.
   const prepare = await prepareAutofillReview({
     form: loaded.form,
     profile,
     savedAnswers,
-    provider,
+    provider: resolved.provider,
     includeProfileContext: false,
   });
 
-  let message: string | null = null;
+  let message: string | null = providerMessage(resolved);
   if (prepare.profileEmpty) {
-    message =
-      'Profile is empty. Saved answers and mock AI may still resolve some questions.';
+    message +=
+      ' Profile is empty. Saved answers and AI fallback may still resolve some questions.';
   }
   if (prepare.fillableCount === 0) {
-    message =
-      (message ? `${message} ` : '') +
-      'No fillable answers yet — unresolved or unsupported questions need attention.';
+    message +=
+      ' No fillable answers yet — unresolved or unsupported questions need attention.';
   }
 
   return {
@@ -134,6 +185,10 @@ export async function runDetectAndResolve(): Promise<
       items: [...prepare.items],
       fillResult: null,
       planRejection: null,
+      providerKind: resolved.kind,
+      providerStatus: resolved.status,
+      providerStatusLabel: resolved.statusLabel,
+      providerId: resolved.provider.id,
     },
   };
 }

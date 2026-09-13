@@ -77,5 +77,8 @@ See [gemini-backend.md](./gemini-backend.md).
 - AI is only invoked for P8 `missing` results.
 - Profile context is optional and allowlisted; it is not automatically
   minimized per question beyond the fixed allowlist.
-- Popup workflow still defaults to the mock provider in this slice.
+- Popup still defaults to the mock provider in this slice.
 - Mock responses are test-scripted and not model quality evaluations.
+
+P12B wires the HTTP provider into the popup with explicit Mock / Gemini
+selection. See [ai-provider-selection.md](./ai-provider-selection.md).

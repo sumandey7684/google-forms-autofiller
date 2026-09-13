@@ -154,7 +154,7 @@ export interface PongResponse {
 export interface ExtensionStatusResponse {
   version: string;
   ready: boolean;
-  scope: 'p11-autofill-workflow';
+  scope: 'p12b-ai-provider-selection';
 }
 
 export interface ProfileResponse {

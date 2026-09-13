@@ -19,10 +19,11 @@ Chrome extension for helping users fill Google Forms (job and internship applica
 | Pre-fill answer validation gate | Complete (P10) |
 | End-to-end review + FillPlan + fill workflow | Complete (P11) |
 | Local Gemini backend + HTTP provider boundary | Complete (P12A) |
-| Live AI SDK / network provider in extension | Not implemented (key stays in local backend) |
+| Popup Mock / Gemini provider selection | Complete (P12B) |
+| Cloud-hosted AI proxy | Not implemented (local loopback only) |
 | Automatic submission | Intentionally not implemented (submit stays manual) |
 
-See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), [docs/google-forms-classification.md](docs/google-forms-classification.md), [docs/google-forms-extraction.md](docs/google-forms-extraction.md), [docs/google-forms-fill.md](docs/google-forms-fill.md), [docs/google-forms-navigation.md](docs/google-forms-navigation.md), [docs/profile-question-matching.md](docs/profile-question-matching.md), [docs/answer-value-resolution.md](docs/answer-value-resolution.md), [docs/ai-answer-provider.md](docs/ai-answer-provider.md), [docs/answer-validation.md](docs/answer-validation.md), [docs/autofill-workflow.md](docs/autofill-workflow.md), and [docs/gemini-backend.md](docs/gemini-backend.md).
+See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), [docs/google-forms-classification.md](docs/google-forms-classification.md), [docs/google-forms-extraction.md](docs/google-forms-extraction.md), [docs/google-forms-fill.md](docs/google-forms-fill.md), [docs/google-forms-navigation.md](docs/google-forms-navigation.md), [docs/profile-question-matching.md](docs/profile-question-matching.md), [docs/answer-value-resolution.md](docs/answer-value-resolution.md), [docs/ai-answer-provider.md](docs/ai-answer-provider.md), [docs/answer-validation.md](docs/answer-validation.md), [docs/autofill-workflow.md](docs/autofill-workflow.md), [docs/gemini-backend.md](docs/gemini-backend.md), and [docs/ai-provider-selection.md](docs/ai-provider-selection.md).
 
 ## Architecture
 
@@ -48,7 +49,7 @@ src/
 
 **Build:** Vite + `@crxjs/vite-plugin` bundles the extension into `dist/`.
 
-## Current scope (P0–P12A)
+## Current scope (P0–P12B)
 
 Implemented:
 
@@ -71,10 +72,11 @@ Implemented:
 - Pure pre-fill validation gate over resolved/orchestrated answer candidates
 - End-to-end workflow: prepare review → user-approved FillPlan → P5 fill
 - Local Gemini backend proxy (`GEMINI_API_KEY` server-side) + extension HTTP provider boundary
+- Popup Mock / Local Gemini provider selection wired into the review pipeline
 
 ## Not implemented yet
 
-- Popup default switch from mock AI to live Gemini HTTP provider
+- Cloud-hosted AI proxy
 - Dedicated saved-answer management UI
 - End-to-end multi-section fill auto-advance
 - Conditional section branching
@@ -93,10 +95,19 @@ Implemented:
 
 ```bash
 npm install
+npm --prefix backend install
 npm run dev
 ```
 
-`npm run dev` starts Vite with CRXJS HMR. Load the generated `dist/` folder as an unpacked extension (see below). After code changes, reload the extension in `chrome://extensions` if the worker or content script does not hot-update.
+For live Gemini fallback, also start the local backend (API key in `.env.local`):
+
+```bash
+pnpm run backend:dev
+```
+
+`npm run dev` / `pnpm run dev` starts Vite with CRXJS HMR. Load the generated `dist/` folder as an unpacked extension (see below). After code changes, reload the extension in `chrome://extensions` if the worker or content script does not hot-update.
+
+In the popup, choose **Mock** (default) or **Local Gemini backend**, then **Detect & resolve**.
 
 ## Type checking
 
@@ -143,7 +154,8 @@ npm run clean
 | `pnpm run p10-answer-validation-smoke` | Run P10 pre-fill answer validation smoke/audit cases |
 | `pnpm run p11-autofill-workflow-smoke` | Run P11 end-to-end review/FillPlan/fill smoke/audit cases |
 | `pnpm run p12a-gemini-provider-smoke` | Run P12A Gemini backend/provider boundary smoke cases |
-| `pnpm run backend:dev` | Start local Gemini proxy (requires `.env`) |
+| `pnpm run p12b-provider-selection-smoke` | Run P12B popup provider-selection smoke cases |
+| `pnpm run backend:dev` | Start local Gemini proxy (requires `.env.local`) |
 | `pnpm run backend:typecheck` | Typecheck the local backend package |
 
 ## License

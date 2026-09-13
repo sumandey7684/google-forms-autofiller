@@ -8,6 +8,12 @@ import type { ExtensionStatusResponse } from '@/utils/messaging';
 import type { AnswerValue } from '@/core/types/answer';
 import type { AutofillReviewItem } from '@/core/engine/index';
 import {
+  AiProviderKind,
+  getAiProviderPreference,
+  saveAiProviderPreference,
+  type AiProviderKind as ProviderKind,
+} from '@/storage/ai-provider-preference';
+import {
   createInitialWorkflowState,
   runDetectAndResolve,
   applyWorkflowReview,
@@ -15,6 +21,11 @@ import {
   formatAnswerPreview,
   type WorkflowState,
 } from './workflow';
+import {
+  checkGeminiBackendHealth,
+  providerStatusLabel,
+  type ProviderRuntimeStatus,
+} from './provider';
 
 function statusClass(status: AutofillReviewItem['status']): string {
   switch (status) {
@@ -49,6 +60,16 @@ function parseEditedValue(
   return { kind: 'single', value: raw };
 }
 
+function providerBadgeClass(status: ProviderRuntimeStatus | null): string {
+  if (status === 'gemini_configured') {
+    return 'provider-badge provider-badge--ok';
+  }
+  if (status === 'gemini_unavailable') {
+    return 'provider-badge provider-badge--warn';
+  }
+  return 'provider-badge';
+}
+
 export function App() {
   const [status, setStatus] = useState<ExtensionStatusResponse | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
@@ -56,6 +77,16 @@ export function App() {
     createInitialWorkflowState(),
   );
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [providerKind, setProviderKind] = useState<ProviderKind>(
+    AiProviderKind.MOCK,
+  );
+  const [providerProbe, setProviderProbe] = useState<{
+    status: ProviderRuntimeStatus;
+    label: string;
+  }>({
+    status: 'mock_active',
+    label: providerStatusLabel('mock_active'),
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -86,10 +117,60 @@ export function App() {
         );
       });
 
+    void getAiProviderPreference().then((kind) => {
+      if (!cancelled) {
+        setProviderKind(kind);
+      }
+    });
+
     return () => {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (providerKind === AiProviderKind.MOCK) {
+      setProviderProbe({
+        status: 'mock_active',
+        label: providerStatusLabel('mock_active'),
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setProviderProbe({
+      status: 'gemini_unavailable',
+      label: 'Checking Gemini backend…',
+    });
+
+    void checkGeminiBackendHealth().then((healthy) => {
+      if (cancelled) {
+        return;
+      }
+      const next: ProviderRuntimeStatus = healthy
+        ? 'gemini_configured'
+        : 'gemini_unavailable';
+      setProviderProbe({
+        status: next,
+        label: providerStatusLabel(next),
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [providerKind]);
+
+  const onProviderChange = useCallback(
+    async (kind: ProviderKind) => {
+      setProviderKind(kind);
+      await saveAiProviderPreference(kind);
+    },
+    [],
+  );
 
   const onDetect = useCallback(() => {
     setWorkflow((prev) => ({
@@ -99,9 +180,15 @@ export function App() {
       fillResult: null,
       planRejection: null,
     }));
-    void runDetectAndResolve().then((result) => {
+    void runDetectAndResolve({ providerKind }).then((result) => {
       setWorkflow(result.state);
       if (result.ok) {
+        if (result.state.providerStatus && result.state.providerStatusLabel) {
+          setProviderProbe({
+            status: result.state.providerStatus,
+            label: result.state.providerStatusLabel,
+          });
+        }
         const nextDrafts: Record<string, string> = {};
         for (const item of result.state.items) {
           nextDrafts[item.questionId] = formatAnswerPreview(item);
@@ -112,7 +199,7 @@ export function App() {
         setDrafts(nextDrafts);
       }
     });
-  }, []);
+  }, [providerKind]);
 
   const onToggleApprove = useCallback(
     (questionId: string, approved: boolean) => {
@@ -151,11 +238,14 @@ export function App() {
     (item) => item.approved && item.fillable,
   ).length;
 
+  const activeProviderLabel =
+    workflow.providerStatusLabel ?? providerProbe.label;
+
   return (
     <main className="popup">
       <header className="popup__header">
         <h1 className="popup__title">Google Form AutoFiller</h1>
-        <p className="popup__subtitle">P11 review & fill</p>
+        <p className="popup__subtitle">P12B review & AI provider</p>
       </header>
 
       <section className="popup__section" aria-live="polite">
@@ -178,6 +268,59 @@ export function App() {
           </ul>
         ) : (
           <p className="popup__muted">Connecting to service worker…</p>
+        )}
+      </section>
+
+      <section className="popup__section" aria-label="AI provider">
+        <p className="popup__form-title">AI provider</p>
+        <div className="provider-choice">
+          <label className="provider-choice__option">
+            <input
+              type="radio"
+              name="ai-provider"
+              checked={providerKind === AiProviderKind.MOCK}
+              onChange={() => {
+                void onProviderChange(AiProviderKind.MOCK);
+              }}
+              disabled={
+                workflow.phase === 'loading' || workflow.phase === 'filling'
+              }
+            />
+            Mock
+          </label>
+          <label className="provider-choice__option">
+            <input
+              type="radio"
+              name="ai-provider"
+              checked={providerKind === AiProviderKind.GEMINI}
+              onChange={() => {
+                void onProviderChange(AiProviderKind.GEMINI);
+              }}
+              disabled={
+                workflow.phase === 'loading' || workflow.phase === 'filling'
+              }
+            />
+            Local Gemini backend
+          </label>
+        </div>
+        <p
+          className={providerBadgeClass(
+            workflow.providerStatus ?? providerProbe.status,
+          )}
+          role="status"
+        >
+          {activeProviderLabel}
+        </p>
+        {providerKind === AiProviderKind.GEMINI ? (
+          <p className="popup__note">
+            Uses http://127.0.0.1:8787 only. Start with{' '}
+            <code>pnpm run backend:dev</code>. No API key is stored in the
+            extension.
+          </p>
+        ) : (
+          <p className="popup__note">
+            Deterministic mock fallback for tests and offline use.
+          </p>
         )}
       </section>
 
@@ -236,6 +379,10 @@ export function App() {
               <strong>
                 {workflow.prepare.profileEmpty ? 'Empty' : 'Loaded'}
               </strong>
+            </li>
+            <li>
+              <span>AI provider</span>
+              <strong>{workflow.providerId ?? '—'}</strong>
             </li>
           </ul>
         </section>
@@ -352,7 +499,8 @@ export function App() {
 
       <p className="popup__note">
         Pipeline: detect → extract → match → resolve → validate → review →
-        FillPlan → fill. Mock AI only; never auto-submits.
+        FillPlan → fill. Never auto-submits. Gemini keys stay in the local
+        backend only.
       </p>
     </main>
   );

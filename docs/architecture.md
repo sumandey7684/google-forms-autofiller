@@ -10,7 +10,7 @@ Google Form AutoFiller helps users fill Google Forms for job and internship appl
 - a review step before fill
 - **manual** submission by the user
 
-This document describes the codebase after **P12A (local Gemini provider boundary)**.
+This document describes the codebase after **P12B (popup AI provider selection)**.
 
 ## 2. P0 foundation (complete)
 
@@ -258,12 +258,23 @@ Local backend proxy keeps `GEMINI_API_KEY` server-side and exposes
 
 See [gemini-backend.md](./gemini-backend.md).
 
+### P12B — Popup AI provider selection
+
+Popup chooses Mock (default) or Local Gemini backend (`HttpAiAnswerProvider`).
+
+- Preference persisted in `chrome.storage.local` (no secrets)
+- Health probe shows configured vs unavailable
+- Selected provider feeds the existing P11 prepare/review/fill pipeline
+- Precedence and P10 validation unchanged; no auto-submit
+
+See [ai-provider-selection.md](./ai-provider-selection.md).
+
 ## 8. Intentionally NOT implemented yet
 
+- Cloud-hosted AI proxy (local loopback only for Gemini)
 - Live AI secret storage inside the extension
-- Popup default switch to live Gemini HTTP provider
 - Saved-answer editing UI beyond review-time value edits
-- Authentication / backend / Google Docs
+- Authentication / Google Docs
 - Automatic submission (permanently out of scope)
 - End-to-end multi-section fill auto-advance
 - Conditional section branching graphs
@@ -283,6 +294,7 @@ See [gemini-backend.md](./gemini-backend.md).
 | **P10** | ✅ Pre-fill answer validation gate |
 | **P11** | ✅ Review UI + FillPlan construction + end-to-end fill |
 | **P12A** | ✅ Local Gemini backend + HTTP provider boundary |
-| **P12B+** | Wire live provider into popup workflow; multi-section fill; manual submit |
+| **P12B** | ✅ Popup provider selection wired to P11 workflow |
+| **P13+** | Multi-section fill orchestration; manual submit |
 
 Each phase should extend adapters/engines without redesigning the P1 core model.

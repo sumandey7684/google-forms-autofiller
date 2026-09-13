@@ -239,3 +239,36 @@ body {
 .review-status--provider {
   color: var(--provider);
 }
+
+.provider-choice {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.provider-choice__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.provider-badge {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.provider-badge--ok {
+  color: var(--valid);
+}
+
+.provider-badge--warn {
+  color: var(--missing);
+}
+
+code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.72rem;
+}
