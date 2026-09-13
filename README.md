@@ -16,10 +16,11 @@ Chrome extension for helping users fill Google Forms (job and internship applica
 | Deterministic profile-to-question matching | Complete (P7) |
 | Local saved answers and deterministic answer-value resolution | Complete (P8) |
 | AI answer provider boundary + deterministic fallback orchestration | Complete (P9) |
+| Pre-fill answer validation gate | Complete (P10) |
 | Live AI SDK / network provider | Not implemented |
 | Automatic submission | Intentionally not implemented (submit stays manual) |
 
-See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), [docs/google-forms-classification.md](docs/google-forms-classification.md), [docs/google-forms-extraction.md](docs/google-forms-extraction.md), [docs/google-forms-fill.md](docs/google-forms-fill.md), [docs/google-forms-navigation.md](docs/google-forms-navigation.md), [docs/profile-question-matching.md](docs/profile-question-matching.md), [docs/answer-value-resolution.md](docs/answer-value-resolution.md), and [docs/ai-answer-provider.md](docs/ai-answer-provider.md).
+See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), [docs/google-forms-classification.md](docs/google-forms-classification.md), [docs/google-forms-extraction.md](docs/google-forms-extraction.md), [docs/google-forms-fill.md](docs/google-forms-fill.md), [docs/google-forms-navigation.md](docs/google-forms-navigation.md), [docs/profile-question-matching.md](docs/profile-question-matching.md), [docs/answer-value-resolution.md](docs/answer-value-resolution.md), [docs/ai-answer-provider.md](docs/ai-answer-provider.md), and [docs/answer-validation.md](docs/answer-validation.md).
 
 ## Architecture
 
@@ -33,6 +34,7 @@ src/
 │   ├── matching/        # Deterministic, DOM-free profile-field matching
 │   ├── resolution/      # Deterministic, DOM-free answer-value resolution
 │   ├── ai/              # AI provider contract + fallback orchestration
+│   ├── answer-validation/ # Pure pre-fill answer validation gate
 │   ├── parser/          # Reserved for form parsing (empty in V1)
 │   ├── engine/          # Reserved for future fill planning
 │   └── validation/      # Zod schemas (e.g. user profile)
@@ -44,7 +46,7 @@ src/
 
 **Build:** Vite + `@crxjs/vite-plugin` bundles the extension into `dist/`.
 
-## Current scope (P0 + P1 + P2 + P3 + P4 + P5 + P6 + P7 + P8 + P9)
+## Current scope (P0 + P1 + P2 + P3 + P4 + P5 + P6 + P7 + P8 + P9 + P10)
 
 Implemented:
 
@@ -64,11 +66,12 @@ Implemented:
 - Deterministic matching of supported extracted questions to existing profile field keys
 - Local saved-answer persistence plus deterministic, validated answer candidates
 - AI provider interface, minimal context builder, mock provider, and fallback orchestration
+- Pure pre-fill validation gate over resolved/orchestrated answer candidates
 
 ## Not implemented yet
 
 - Live AI SDK / network provider and secret storage
-- FillPlan construction from resolved candidates
+- FillPlan construction from validated candidates
 - Saved-answer editing or review UI
 - End-to-end multi-section fill orchestration
 - Conditional section branching
@@ -135,6 +138,7 @@ npm run clean
 | `pnpm run p7-matching-smoke` | Run deterministic P7 matching smoke/audit cases |
 | `pnpm run p8-saved-answers-smoke` | Run P8 resolution, validation, and persistence smoke/audit cases |
 | `pnpm run p9-ai-provider-smoke` | Run P9 AI fallback orchestration smoke/audit cases |
+| `pnpm run p10-answer-validation-smoke` | Run P10 pre-fill answer validation smoke/audit cases |
 
 ## License
 

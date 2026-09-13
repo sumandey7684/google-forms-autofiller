@@ -10,7 +10,7 @@ Google Form AutoFiller helps users fill Google Forms for job and internship appl
 - a review step before fill
 - **manual** submission by the user
 
-This document describes the codebase after **P9 (AI answer provider boundary)**.
+This document describes the codebase after **P10 (pre-fill answer validation)**.
 
 ## 2. P0 foundation (complete)
 
@@ -53,6 +53,7 @@ Discovery details: [google-forms-discovery.md](./google-forms-discovery.md).
 - **MatchingReport** / **QuestionMatchResult** — deterministic field-key matches, ambiguity, and unmatched/unsupported states
 - **SavedAnswer** / **AnswerResolutionReport** — local answer sources, validated candidates, ambiguity, and missing/blocked states
 - **AiAnswerProvider** / **OrchestratedAnswerReport** — provider-agnostic AI fallback after local resolution
+- **PrefillValidationReport** — pure pre-fill gate over resolved/orchestrated candidates
 - **FormAdapter** — `canHandle` / `extract` / `fill`
 - **AppError** — typed `ErrorCode` + message
 
@@ -61,7 +62,7 @@ Answers are **not** DOM values. Fill plans are **not** Google-specific selectors
 ## 5. Dependency direction
 
 ```
-core/types + core/matching + core/resolution + core/ai  (pure domain logic)
+core/types + core/matching + core/resolution + core/ai + core/answer-validation  (pure domain logic)
      ↑
 core/validation  (Zod for boundaries + profile schema)
      ↑
@@ -76,6 +77,7 @@ content Google Forms adapter (future) implements FormAdapter
 - `core/matching` must not read profile values, storage, messaging, or FillPlan execution code.
 - `core/resolution` receives values as arguments; it must not access storage, messaging, DOM, network, AI, or FillPlan execution.
 - `core/ai` may call a injected provider interface but must not embed SDKs, API keys, DOM access, or FillPlan execution.
+- `core/answer-validation` must remain a pure pre-fill gate with no DOM, storage, network, AI, or FillPlan execution.
 - Content may depend on core; core must not depend on content.
 - Popup depends on messaging contracts + presentation only.
 
@@ -217,10 +219,23 @@ See [answer-value-resolution.md](./answer-value-resolution.md).
 
 See [ai-answer-provider.md](./ai-answer-provider.md).
 
+### P10 — Pre-fill answer validation
+
+`validateAnswersForFill({ form, candidates })` re-validates resolved or
+orchestrated candidates before any FillPlan exists.
+
+- Reuses `AnswerValue`, shared Zod schema, and P8 `validateAnswerValue`
+- Preserves `missing`, `invalid`, `ambiguous`, `unsupported`, and `provider_error`
+- Marks required unanswered questions without inventing values
+- Exposes `fillable` + `readyForFillPlan` for a later FillPlan builder
+- Does **not** construct/execute FillPlans or change the P5 fill engine
+
+See [answer-validation.md](./answer-validation.md).
+
 ## 8. Intentionally NOT implemented yet
 
 - Live AI SDK / network provider adapters and secret storage
-- FillPlan construction from resolved candidates
+- FillPlan construction from validated candidates
 - Saved-answer editing or review UI
 - Review UI beyond the status popup
 - Authentication / backend / Google Docs
@@ -240,6 +255,7 @@ See [ai-answer-provider.md](./ai-answer-provider.md).
 | **P7** | ✅ Deterministic profile-field matching (no values or FillPlan) |
 | **P8** | ✅ Local saved answers + deterministic answer-value resolution |
 | **P9** | ✅ AI provider boundary + deterministic fallback orchestration |
-| **P10+** | Live AI adapter / FillPlan construction / review; manual submit |
+| **P10** | ✅ Pre-fill answer validation gate |
+| **P11+** | FillPlan construction / review / live AI adapter; manual submit |
 
 Each phase should extend adapters/engines without redesigning the P1 core model.

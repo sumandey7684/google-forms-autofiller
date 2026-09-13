@@ -1,0 +1,93 @@
+{
+  "form": {
+    "id": "form:p10-validation",
+    "title": "P10 validation fixture",
+    "url": "https://example.invalid/p10",
+    "extractedAt": "2026-09-13T00:00:00.000Z",
+    "sections": [
+      {
+        "id": "section:1",
+        "title": "Gate",
+        "questions": [
+          {
+            "id": "q-text-required",
+            "type": "text",
+            "text": "Full Name",
+            "required": true
+          },
+          {
+            "id": "q-paragraph",
+            "type": "paragraph",
+            "text": "About you",
+            "required": false
+          },
+          {
+            "id": "q-mc",
+            "type": "multiple_choice",
+            "text": "Preferred Role",
+            "required": true,
+            "options": [
+              { "id": "opt:engineer", "label": "Engineer" },
+              { "id": "opt:designer", "label": "Designer" }
+            ]
+          },
+          {
+            "id": "q-checkbox",
+            "type": "checkbox",
+            "text": "Skills",
+            "options": [
+              { "id": "opt:ts", "label": "TypeScript" },
+              { "id": "opt:rs", "label": "Rust" }
+            ]
+          },
+          {
+            "id": "q-dropdown",
+            "type": "dropdown",
+            "text": "Country",
+            "options": [
+              { "id": "opt:in", "label": "India" },
+              { "id": "opt:us", "label": "United States" }
+            ]
+          },
+          {
+            "id": "q-scale",
+            "type": "linear_scale",
+            "text": "Rating",
+            "min": 1,
+            "max": 5
+          },
+          {
+            "id": "q-date",
+            "type": "date",
+            "text": "Start date"
+          },
+          {
+            "id": "q-time",
+            "type": "time",
+            "text": "Start time"
+          },
+          {
+            "id": "q-dup-label",
+            "type": "multiple_choice",
+            "text": "Duplicate labels",
+            "options": [
+              { "id": "opt:a", "label": "Same" },
+              { "id": "opt:b", "label": "Same" }
+            ]
+          },
+          {
+            "id": "q-unknown",
+            "type": "unknown",
+            "text": "Unknown widget"
+          },
+          {
+            "id": "q-optional-empty",
+            "type": "text",
+            "text": "Optional notes",
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+}
