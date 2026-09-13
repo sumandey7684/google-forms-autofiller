@@ -61,5 +61,8 @@ P10 does not:
   it does not alone fail `readyForFillPlan` the way `required: true` does.
 - Optional unanswered questions remain `missing` and non-fillable without
   blocking readiness by themselves.
-- P10 does not yet emit FillPlan operations; a later phase consumes
-  `fillable` results.
+- Upstream `invalid` candidates without a retained value can surface as
+  `missing` at the gate; P11 review edits and FillPlan construction still
+  reject bad values explicitly when a value is present.
+- P10 itself does not emit FillPlan operations; P11 consumes `fillable`
+  results after user review.

@@ -17,10 +17,11 @@ Chrome extension for helping users fill Google Forms (job and internship applica
 | Local saved answers and deterministic answer-value resolution | Complete (P8) |
 | AI answer provider boundary + deterministic fallback orchestration | Complete (P9) |
 | Pre-fill answer validation gate | Complete (P10) |
+| End-to-end review + FillPlan + fill workflow | Complete (P11) |
 | Live AI SDK / network provider | Not implemented |
 | Automatic submission | Intentionally not implemented (submit stays manual) |
 
-See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), [docs/google-forms-classification.md](docs/google-forms-classification.md), [docs/google-forms-extraction.md](docs/google-forms-extraction.md), [docs/google-forms-fill.md](docs/google-forms-fill.md), [docs/google-forms-navigation.md](docs/google-forms-navigation.md), [docs/profile-question-matching.md](docs/profile-question-matching.md), [docs/answer-value-resolution.md](docs/answer-value-resolution.md), [docs/ai-answer-provider.md](docs/ai-answer-provider.md), and [docs/answer-validation.md](docs/answer-validation.md).
+See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), [docs/google-forms-classification.md](docs/google-forms-classification.md), [docs/google-forms-extraction.md](docs/google-forms-extraction.md), [docs/google-forms-fill.md](docs/google-forms-fill.md), [docs/google-forms-navigation.md](docs/google-forms-navigation.md), [docs/profile-question-matching.md](docs/profile-question-matching.md), [docs/answer-value-resolution.md](docs/answer-value-resolution.md), [docs/ai-answer-provider.md](docs/ai-answer-provider.md), [docs/answer-validation.md](docs/answer-validation.md), and [docs/autofill-workflow.md](docs/autofill-workflow.md).
 
 ## Architecture
 
@@ -35,8 +36,8 @@ src/
 │   ├── resolution/      # Deterministic, DOM-free answer-value resolution
 │   ├── ai/              # AI provider contract + fallback orchestration
 │   ├── answer-validation/ # Pure pre-fill answer validation gate
+│   ├── engine/          # P11 review prepare + FillPlan builder
 │   ├── parser/          # Reserved for form parsing (empty in V1)
-│   ├── engine/          # Reserved for future fill planning
 │   └── validation/      # Zod schemas (e.g. user profile)
 ├── storage/             # chrome.storage wrappers
 └── utils/               # Messaging helpers and shared utilities
@@ -46,7 +47,7 @@ src/
 
 **Build:** Vite + `@crxjs/vite-plugin` bundles the extension into `dist/`.
 
-## Current scope (P0 + P1 + P2 + P3 + P4 + P5 + P6 + P7 + P8 + P9 + P10)
+## Current scope (P0–P11)
 
 Implemented:
 
@@ -54,7 +55,7 @@ Implemented:
 - TypeScript (strict) + React + Vite
 - Background service worker
 - Content script registration on Google Forms URLs
-- Minimal popup UI that pings the service worker
+- Popup review UI for detect → resolve → approve/edit → fill
 - Typed messaging contracts (`PING`, profile, status, `DETECT_FORM`, `DISCOVER_FORM`, `CLASSIFY_FORM`, `GET_FORM`, `EXTRACT_FORM`, `FILL_FORM`, `INSPECT_NAVIGATION`, `NAVIGATE_FORM`)
 - Profile schema + `chrome.storage.local` helpers
 - Domain model: Form / Section / Question / FormAnswer / FillPlan / FillResult / FormAdapter / AppError / Navigation*
@@ -67,15 +68,14 @@ Implemented:
 - Local saved-answer persistence plus deterministic, validated answer candidates
 - AI provider interface, minimal context builder, mock provider, and fallback orchestration
 - Pure pre-fill validation gate over resolved/orchestrated answer candidates
+- End-to-end workflow: prepare review → user-approved FillPlan → P5 fill
 
 ## Not implemented yet
 
 - Live AI SDK / network provider and secret storage
-- FillPlan construction from validated candidates
-- Saved-answer editing or review UI
-- End-to-end multi-section fill orchestration
+- Dedicated saved-answer management UI
+- End-to-end multi-section fill auto-advance
 - Conditional section branching
-- Review UI before fill
 - Authentication / accounts
 - Backend APIs
 - Google Docs support
@@ -139,6 +139,7 @@ npm run clean
 | `pnpm run p8-saved-answers-smoke` | Run P8 resolution, validation, and persistence smoke/audit cases |
 | `pnpm run p9-ai-provider-smoke` | Run P9 AI fallback orchestration smoke/audit cases |
 | `pnpm run p10-answer-validation-smoke` | Run P10 pre-fill answer validation smoke/audit cases |
+| `pnpm run p11-autofill-workflow-smoke` | Run P11 end-to-end review/FillPlan/fill smoke/audit cases |
 
 ## License
 

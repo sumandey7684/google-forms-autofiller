@@ -18,7 +18,8 @@
     "p7-matching-smoke": "tsx --tsconfig tsconfig.app.json scripts/p7-matching-smoke.ts",
     "p8-saved-answers-smoke": "tsx --tsconfig tsconfig.app.json scripts/p8-saved-answers-smoke.ts",
     "p9-ai-provider-smoke": "tsx --tsconfig tsconfig.app.json scripts/p9-ai-provider-smoke.ts",
-    "p10-answer-validation-smoke": "tsx --tsconfig tsconfig.app.json scripts/p10-answer-validation-smoke.ts"
+    "p10-answer-validation-smoke": "tsx --tsconfig tsconfig.app.json scripts/p10-answer-validation-smoke.ts",
+    "p11-autofill-workflow-smoke": "tsx --tsconfig tsconfig.app.json scripts/p11-autofill-workflow-smoke.ts"
   },
   "dependencies": {
     "react": "^19.0.0",

@@ -10,7 +10,7 @@ Google Form AutoFiller helps users fill Google Forms for job and internship appl
 - a review step before fill
 - **manual** submission by the user
 
-This document describes the codebase after **P10 (pre-fill answer validation)**.
+This document describes the codebase after **P11 (end-to-end autofill workflow)**.
 
 ## 2. P0 foundation (complete)
 
@@ -62,13 +62,13 @@ Answers are **not** DOM values. Fill plans are **not** Google-specific selectors
 ## 5. Dependency direction
 
 ```
-core/types + core/matching + core/resolution + core/ai + core/answer-validation  (pure domain logic)
+core/types + core/matching + core/resolution + core/ai + core/answer-validation + core/engine  (pure domain logic)
      ↑
 core/validation  (Zod for boundaries + profile schema)
      ↑
 utils / storage / background / popup / content
      ↑
-content Google Forms adapter (future) implements FormAdapter
+content Google Forms adapter implements FormAdapter
 ```
 
 **Rules**
@@ -78,6 +78,7 @@ content Google Forms adapter (future) implements FormAdapter
 - `core/resolution` receives values as arguments; it must not access storage, messaging, DOM, network, AI, or FillPlan execution.
 - `core/ai` may call a injected provider interface but must not embed SDKs, API keys, DOM access, or FillPlan execution.
 - `core/answer-validation` must remain a pure pre-fill gate with no DOM, storage, network, AI, or FillPlan execution.
+- `core/engine` may compose P7–P10 and build FillPlans, but must not touch DOM, Chrome APIs, or execute fills.
 - Content may depend on core; core must not depend on content.
 - Popup depends on messaging contracts + presentation only.
 
@@ -98,6 +99,8 @@ Central contract: `MessageType` + Zod `ExtensionMessageSchema` in `core/validati
 | `FILL_FORM` | content | P5 apply `FillPlan` → `FillResult` |
 | `INSPECT_NAVIGATION` | content | P6 navigation inspect (read-only) |
 | `NAVIGATE_FORM` | content | P6 `{ action: 'next' \| 'back' }` — never Submit |
+
+P11 orchestration runs in the popup (profile/saved answers + pure `core/engine`), then sends existing `DETECT_FORM` / `EXTRACT_FORM` / `FILL_FORM` messages to the active tab. No new AI/network message types.
 
 Runtime validation: `isExtensionMessage` / `AppErrorSchema` at extension boundaries. Errors use `{ error: AppError }`, not bare strings.
 
@@ -227,20 +230,29 @@ orchestrated candidates before any FillPlan exists.
 - Reuses `AnswerValue`, shared Zod schema, and P8 `validateAnswerValue`
 - Preserves `missing`, `invalid`, `ambiguous`, `unsupported`, and `provider_error`
 - Marks required unanswered questions without inventing values
-- Exposes `fillable` + `readyForFillPlan` for a later FillPlan builder
+- Exposes `fillable` + `readyForFillPlan` for the P11 FillPlan builder
 - Does **not** construct/execute FillPlans or change the P5 fill engine
 
 See [answer-validation.md](./answer-validation.md).
 
+### P11 — End-to-end autofill workflow
+
+`prepareAutofillReview` → popup review → `buildFillPlanFromApproved` → `FILL_FORM`.
+
+- Keeps P7–P10 pure; orchestration adapters live in `core/engine` + popup
+- Review UI shows statuses and allows approve/edit of valid answers only
+- FillPlan contains only user-approved, re-validated answers
+- Mock AI only; never auto-submits
+
+See [autofill-workflow.md](./autofill-workflow.md).
+
 ## 8. Intentionally NOT implemented yet
 
 - Live AI SDK / network provider adapters and secret storage
-- FillPlan construction from validated candidates
-- Saved-answer editing or review UI
-- Review UI beyond the status popup
+- Saved-answer editing UI beyond review-time value edits
 - Authentication / backend / Google Docs
 - Automatic submission (permanently out of scope)
-- End-to-end multi-section fill orchestration
+- End-to-end multi-section fill auto-advance
 - Conditional section branching graphs
 
 ## 9. Planned next evolution
@@ -256,6 +268,7 @@ See [answer-validation.md](./answer-validation.md).
 | **P8** | ✅ Local saved answers + deterministic answer-value resolution |
 | **P9** | ✅ AI provider boundary + deterministic fallback orchestration |
 | **P10** | ✅ Pre-fill answer validation gate |
-| **P11+** | FillPlan construction / review / live AI adapter; manual submit |
+| **P11** | ✅ Review UI + FillPlan construction + end-to-end fill |
+| **P12+** | Live AI adapter / multi-section fill orchestration; manual submit |
 
 Each phase should extend adapters/engines without redesigning the P1 core model.

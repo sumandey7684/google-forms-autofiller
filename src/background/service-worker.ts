@@ -37,7 +37,7 @@ async function handleMessage(
       const response: ExtensionStatusResponse = {
         version: EXTENSION_VERSION,
         ready: true,
-        scope: 'p6-navigation',
+        scope: 'p11-autofill-workflow',
       };
       return response;
     }
@@ -108,5 +108,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 });
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.info('[Google Form AutoFiller] Service worker installed (P6 navigation).');
+  console.info(
+    '[Google Form AutoFiller] Service worker installed (P11 autofill workflow).',
+  );
 });

@@ -1,0 +1,102 @@
+{
+  "profile": {
+    "fullName": "Profile Test User",
+    "email": "profile@example.com",
+    "phone": "+1 555 0100",
+    "location": "Profile City"
+  },
+  "form": {
+    "id": "form:p11-workflow",
+    "title": "P11 workflow fixture",
+    "url": "https://example.invalid/p11-workflow",
+    "extractedAt": "2026-09-13T00:00:00.000Z",
+    "sections": [
+      {
+        "id": "section:1",
+        "title": "Answers",
+        "questions": [
+          {
+            "id": "q-saved-exact",
+            "type": "text",
+            "text": "Full Name",
+            "required": true
+          },
+          {
+            "id": "q-profile-email",
+            "type": "text",
+            "text": "Email Address",
+            "required": true
+          },
+          {
+            "id": "q-ai-why",
+            "type": "paragraph",
+            "text": "Why do you want this role?",
+            "required": false
+          },
+          {
+            "id": "q-invalid-saved",
+            "type": "linear_scale",
+            "text": "Interest",
+            "min": 1,
+            "max": 5,
+            "required": false
+          },
+          {
+            "id": "q-ambiguous",
+            "type": "text",
+            "text": "Current Location",
+            "required": false
+          },
+          {
+            "id": "q-unsupported",
+            "type": "unknown",
+            "text": "Unknown widget",
+            "required": false
+          },
+          {
+            "id": "q-unresolved",
+            "type": "text",
+            "text": "Favorite color that is not in the profile",
+            "required": false
+          },
+          {
+            "id": "q-role",
+            "type": "multiple_choice",
+            "text": "Preferred Role",
+            "required": false,
+            "options": [
+              { "id": "opt:engineer", "label": "Engineer" },
+              { "id": "opt:designer", "label": "Designer" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "savedAnswerInputs": [
+    {
+      "questionId": "q-saved-exact",
+      "questionText": "Full Name",
+      "questionType": "text",
+      "value": { "kind": "single", "value": "Saved Exact User" }
+    },
+    {
+      "questionId": "q-invalid-saved",
+      "questionText": "Interest",
+      "questionType": "linear_scale",
+      "value": { "kind": "single", "value": "99" }
+    },
+    {
+      "questionText": "Current Location",
+      "questionType": "text",
+      "context": "application-a",
+      "value": { "kind": "single", "value": "City A" }
+    },
+    {
+      "questionText": "Current Location",
+      "questionType": "text",
+      "context": "application-b",
+      "value": { "kind": "single", "value": "City B" }
+    }
+  ]
+}

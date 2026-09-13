@@ -27,7 +27,7 @@ import { ErrorCode, createAppError, isAppError } from '@/core/types/errors';
 
 /**
  * Content script entry.
- * P2–P5 pipeline + P6 section navigation (never submits).
+ * P2–P6 Google Forms pipeline + handlers for P11 FILL_FORM.
  */
 
 const adapter = createGoogleFormsAdapter();
