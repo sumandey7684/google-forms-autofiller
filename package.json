@@ -19,7 +19,10 @@
     "p8-saved-answers-smoke": "tsx --tsconfig tsconfig.app.json scripts/p8-saved-answers-smoke.ts",
     "p9-ai-provider-smoke": "tsx --tsconfig tsconfig.app.json scripts/p9-ai-provider-smoke.ts",
     "p10-answer-validation-smoke": "tsx --tsconfig tsconfig.app.json scripts/p10-answer-validation-smoke.ts",
-    "p11-autofill-workflow-smoke": "tsx --tsconfig tsconfig.app.json scripts/p11-autofill-workflow-smoke.ts"
+    "p11-autofill-workflow-smoke": "tsx --tsconfig tsconfig.app.json scripts/p11-autofill-workflow-smoke.ts",
+    "p12a-gemini-provider-smoke": "tsx --tsconfig tsconfig.app.json scripts/p12a-gemini-provider-smoke.ts",
+    "backend:dev": "npm --prefix backend run dev",
+    "backend:typecheck": "npm --prefix backend run typecheck"
   },
   "dependencies": {
     "react": "^19.0.0",

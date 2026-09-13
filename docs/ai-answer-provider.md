@@ -60,15 +60,22 @@ never silently replaced by AI.
 
 ## Configuration
 
-API keys and live provider credentials must stay out of source control.
-A future live adapter may read configuration from extension settings or the
-environment at a non-core boundary. P9 itself does not store secrets.
+API keys and live provider credentials must stay out of source control and out
+of the extension bundle.
+
+P12A adds a **local backend proxy**:
+
+- extension → `HttpAiAnswerProvider` → local backend → Gemini Interactions API
+- `GEMINI_API_KEY` is read only from backend env (see `.env.example`)
+- deterministic `MockAiAnswerProvider` remains for tests
+
+See [gemini-backend.md](./gemini-backend.md).
 
 ## Known limitations
 
-- No live OpenAI/Anthropic/Gemini integration yet.
+- Live Gemini calls require a running local backend and a configured `.env`.
 - AI is only invoked for P8 `missing` results.
 - Profile context is optional and allowlisted; it is not automatically
   minimized per question beyond the fixed allowlist.
-- No review UI, messaging commands, or FillPlan construction in P9.
+- Popup workflow still defaults to the mock provider in this slice.
 - Mock responses are test-scripted and not model quality evaluations.

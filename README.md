@@ -18,10 +18,11 @@ Chrome extension for helping users fill Google Forms (job and internship applica
 | AI answer provider boundary + deterministic fallback orchestration | Complete (P9) |
 | Pre-fill answer validation gate | Complete (P10) |
 | End-to-end review + FillPlan + fill workflow | Complete (P11) |
-| Live AI SDK / network provider | Not implemented |
+| Local Gemini backend + HTTP provider boundary | Complete (P12A) |
+| Live AI SDK / network provider in extension | Not implemented (key stays in local backend) |
 | Automatic submission | Intentionally not implemented (submit stays manual) |
 
-See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), [docs/google-forms-classification.md](docs/google-forms-classification.md), [docs/google-forms-extraction.md](docs/google-forms-extraction.md), [docs/google-forms-fill.md](docs/google-forms-fill.md), [docs/google-forms-navigation.md](docs/google-forms-navigation.md), [docs/profile-question-matching.md](docs/profile-question-matching.md), [docs/answer-value-resolution.md](docs/answer-value-resolution.md), [docs/ai-answer-provider.md](docs/ai-answer-provider.md), [docs/answer-validation.md](docs/answer-validation.md), and [docs/autofill-workflow.md](docs/autofill-workflow.md).
+See [docs/architecture.md](docs/architecture.md), [docs/google-forms-discovery.md](docs/google-forms-discovery.md), [docs/google-forms-classification.md](docs/google-forms-classification.md), [docs/google-forms-extraction.md](docs/google-forms-extraction.md), [docs/google-forms-fill.md](docs/google-forms-fill.md), [docs/google-forms-navigation.md](docs/google-forms-navigation.md), [docs/profile-question-matching.md](docs/profile-question-matching.md), [docs/answer-value-resolution.md](docs/answer-value-resolution.md), [docs/ai-answer-provider.md](docs/ai-answer-provider.md), [docs/answer-validation.md](docs/answer-validation.md), [docs/autofill-workflow.md](docs/autofill-workflow.md), and [docs/gemini-backend.md](docs/gemini-backend.md).
 
 ## Architecture
 
@@ -47,7 +48,7 @@ src/
 
 **Build:** Vite + `@crxjs/vite-plugin` bundles the extension into `dist/`.
 
-## Current scope (P0–P11)
+## Current scope (P0–P12A)
 
 Implemented:
 
@@ -69,15 +70,16 @@ Implemented:
 - AI provider interface, minimal context builder, mock provider, and fallback orchestration
 - Pure pre-fill validation gate over resolved/orchestrated answer candidates
 - End-to-end workflow: prepare review → user-approved FillPlan → P5 fill
+- Local Gemini backend proxy (`GEMINI_API_KEY` server-side) + extension HTTP provider boundary
 
 ## Not implemented yet
 
-- Live AI SDK / network provider and secret storage
+- Popup default switch from mock AI to live Gemini HTTP provider
 - Dedicated saved-answer management UI
 - End-to-end multi-section fill auto-advance
 - Conditional section branching
 - Authentication / accounts
-- Backend APIs
+- Cloud backend APIs
 - Google Docs support
 - Automatic form submission (out of scope permanently — submit stays manual)
 
@@ -140,6 +142,9 @@ npm run clean
 | `pnpm run p9-ai-provider-smoke` | Run P9 AI fallback orchestration smoke/audit cases |
 | `pnpm run p10-answer-validation-smoke` | Run P10 pre-fill answer validation smoke/audit cases |
 | `pnpm run p11-autofill-workflow-smoke` | Run P11 end-to-end review/FillPlan/fill smoke/audit cases |
+| `pnpm run p12a-gemini-provider-smoke` | Run P12A Gemini backend/provider boundary smoke cases |
+| `pnpm run backend:dev` | Start local Gemini proxy (requires `.env`) |
+| `pnpm run backend:typecheck` | Typecheck the local backend package |
 
 ## License
 

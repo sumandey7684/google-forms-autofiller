@@ -1,0 +1,21 @@
+{
+  "name": "@google-form-auto-filler/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local Gemini proxy for Google Form AutoFiller (API key stays server-side).",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc -p tsconfig.json --pretty false"
+  },
+  "dependencies": {
+    "@google/genai": "^2.22.0",
+    "zod": "3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.23.13",
+    "typescript": "^5.8.2"
+  }
+}

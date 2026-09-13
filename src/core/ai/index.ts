@@ -1,6 +1,8 @@
 export { buildAiQuestionContext } from './context';
 export { MockAiAnswerProvider } from './mock-provider';
 export type { MockAiAnswerProviderOptions, MockAiScriptedResponse } from './mock-provider';
+export { HttpAiAnswerProvider } from './http-provider';
+export type { HttpAiAnswerProviderOptions } from './http-provider';
 export { resolveAnswersWithAiFallback } from './orchestrate';
 export {
   AI_CONTEXT_PROFILE_FIELDS,
